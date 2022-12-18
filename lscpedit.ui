@@ -38,7 +38,7 @@
     <widget class="QPushButton" name="openFilebtn">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>60</x>
        <y>20</y>
        <width>71</width>
        <height>21</height>
@@ -48,6 +48,16 @@
       <string>Open</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QPlainTextEdit" name="plainTextEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>891</width>
+      <height>391</height>
+     </rect>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

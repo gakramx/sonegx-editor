@@ -1,6 +1,7 @@
 #include "lscpedit.h"
 #include "./ui_lscpedit.h"
  #include <QFileDialog>
+#include <QTextStream>
 lscpedit::lscpedit(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::lscpedit)
@@ -33,5 +34,18 @@ lscpedit::~lscpedit()
 void lscpedit::on_openFilebtn_clicked()
 {
           QString fileName = QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("lscp File(*.lscp)"));
+          QFile inputFile(fileName);
+          if (inputFile.open(QIODevice::ReadOnly))
+          {
+             QTextStream in(&inputFile);
+             ui->plainTextEdit->clear();
+             while (!in.atEnd())
+             {
+                QString line = in.readLine();
+                ui->plainTextEdit->appendPlainText(line);
+             }
+             inputFile.close();
+          }
+
 }
 
