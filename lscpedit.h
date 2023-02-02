@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMimeData>
 #include <QDragEnterEvent>
+ #include <QStandardItemModel>
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
 QT_END_NAMESPACE
@@ -18,8 +19,12 @@ public:
 
 void dragEnterEvent(QDragEnterEvent *e);
 void dropEvent(QDropEvent *e);
+QStandardItemModel *model;
 private slots:
-void on_openFilebtn_clicked();
+void calcBank();
+
+
+void on_actionOpen_triggered();
 
 private:
     Ui::lscpedit *ui;
