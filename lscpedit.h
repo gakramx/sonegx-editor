@@ -23,15 +23,19 @@ void dragEnterEvent(QDragEnterEvent *e);
 void dropEvent(QDropEvent *e);
 QStandardItemModel *model;
 QString *filename;
+QString *gigFileName;
 QStringList splitLine(const QString &line);
 QStringList extractWordsBetweenApostrophes(const QString& line);
 QString removeWordsBetweenApostrophes(const QString& line);
 void printFiletoTable(QString *file, int mapIndex);
+void getGigFileName(QString *insfile);
 private slots:
 
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
 void calcBank();
+void on_selectInstFile_pushButton_clicked();
+
 private:
     Ui::lscpedit *ui;
 };

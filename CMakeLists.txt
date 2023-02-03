@@ -49,7 +49,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(lscpedit PRIVATE Qt${QT_VERSION_MAJOR}::Widgets  Qt${QT_VERSION_MAJOR}::Concurrent)
+target_link_libraries(lscpedit PRIVATE Qt${QT_VERSION_MAJOR}::Widgets  Qt${QT_VERSION_MAJOR}::Concurrent  ${LIBGIG_LIBRARIES})
 
 set_target_properties(lscpedit PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

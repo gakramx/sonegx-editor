@@ -5,7 +5,10 @@
 #include <QtConcurrent/QtConcurrent>
 #include <iostream>
 #include <string>
-#include <gig.h>
+
+#include<libgig/gig.h>
+
+
 
 #include <QComboBox>
 
@@ -19,6 +22,7 @@ lscpedit::lscpedit(QWidget *parent)
     setAcceptDrops(true);
     model = new QStandardItemModel(this);
     filename = new QString();
+    gigFileName = new QString();
     model->setHorizontalHeaderItem(0, new QStandardItem("Bank"));
     model->setHorizontalHeaderItem(1, new QStandardItem("Prog"));
     model->setHorizontalHeaderItem(2, new QStandardItem("Engine"));
@@ -289,7 +293,7 @@ void lscpedit::printMap(int mapIndex){
 
 
 
-    if (inputFile.open(QIODevice::ReadOnly))
+    if (inputFile.open(QIODevice::ReadWrite))
     {
         //int mapIndex=1;
         QTextStream stream(&inputFile);
@@ -460,3 +464,24 @@ void lscpedit::on_actionOpen_triggered()
 
     printFiletoTable(filename,0);
 }
+void lscpedit::getGigFileName(QString *insfile){
+    QString filePath = *insfile;
+    std::string gigFilePath =   filePath.toStdString();
+   //  std::string gigFilePath = "/home/akram/Mun.gig";
+    RIFF::File* riff = new RIFF::File(gigFilePath);
+    gig::File* gig = new gig::File(riff);
+    gig::Instrument* instr = gig->GetInstrument(0);
+    QString fInstName = QString::fromStdString(instr->pInfo->Name);
+   // qDebug()<<fInstName;
+     ui->nameGig_lineEdit->setText(fInstName);
+    delete riff;
+    delete gig;
+}
+void lscpedit::on_selectInstFile_pushButton_clicked()
+{
+   *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+     ui->nameGig_lineEdit->setText("Loading ...");
+   // getGigFileName(gigFileName);
+
+}
+
