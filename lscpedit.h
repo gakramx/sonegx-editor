@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QMimeData>
 #include <QDragEnterEvent>
- #include <QStandardItemModel>
+#include <QStandardItemModel>
+#include <QString>
+#include <QStringList>
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
 QT_END_NAMESPACE
@@ -20,12 +22,16 @@ public:
 void dragEnterEvent(QDragEnterEvent *e);
 void dropEvent(QDropEvent *e);
 QStandardItemModel *model;
+QString *filename;
+QStringList splitLine(const QString &line);
+QStringList extractWordsBetweenApostrophes(const QString& line);
+QString removeWordsBetweenApostrophes(const QString& line);
+void printFiletoTable(QString *file, int mapIndex);
 private slots:
-void calcBank();
 
-
+void printMap(int mapIndex);
 void on_actionOpen_triggered();
-
+void calcBank();
 private:
     Ui::lscpedit *ui;
 };
