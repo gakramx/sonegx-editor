@@ -53,7 +53,6 @@ lscpedit::lscpedit(QWidget *parent)
         QModelIndexList indexes = selected.indexes();
         for (int i = 0; i < indexes.count(); i++) {
             int row = indexes.at(i).row();
-
             QString bank_data = model->item(row, 0)->text();
             QString prog_data = model->item(row, 1)->text();
             QString engine_data = model->item(row, 2)->text();
@@ -98,8 +97,7 @@ lscpedit::lscpedit(QWidget *parent)
     });
     connect(ui->msb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->lsb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
-    connect(ui->map_comboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(printMap(int)));
+    connect(ui->map_comboBox, SIGNAL(currentIndexChanged(int)),this, SLOT(printMap(int)));
 }
 void lscpedit::calcBank(){
     if(ui->autoCalc_checkBox->isChecked()){
@@ -176,289 +174,91 @@ QString lscpedit::removeWordsBetweenApostrophes(const QString& line) {
     return result;
 }
 void lscpedit::printFiletoTable(QString *file,int mapIndex){
-
     model->removeRows(0, model->rowCount());
-
+    QStringList mapsFinal;
     QFile inputFile(*file);
-    // QStandardItemModel *model = new QStandardItemModel(0,3);
     ui->map_comboBox->clear();
-    model->removeRows(0, model->rowCount());
-    QComboBox *comboBox = new QComboBox;
-    comboBox->addItem("Default 1");
-    comboBox->addItem("item 2");
-    comboBox->addItem("item 3");
-
-
-
     if (inputFile.open(QIODevice::ReadOnly))
     {
-        //int mapIndex=1;
         QTextStream stream(&inputFile);
-
         while (!stream.atEnd())
         {
             QString line = stream.readLine();
-            /*    if (line.startsWith("#")) {
-                     continue;
-                 }*/
-
-            if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+            if (line.startsWith("#"))
+                continue;
+            else if (line.isEmpty())
+                continue;
+            else if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+                qDebug()<< "Found1 ";
+                qDebug()<<line;
                 QStringList maps = extractWordsBetweenApostrophes(line);
-                ui->map_comboBox->addItem(maps.last());
-
-                while (!stream.atEnd()) {
-                    line = stream.readLine();
-
-                    if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-                        QStringList getIndex = line.split(" ");
-                        QString indexToInt = getIndex.at(3);
-
-                        int finalInt= indexToInt.toInt();
-                        if(finalInt==mapIndex)
-                        {
-                        //  QStringList words = splitLine(line);
-                        QStringList words2 = extractWordsBetweenApostrophes(line);
-                        QString modifiedLine = removeWordsBetweenApostrophes(line);
-
-                        QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
-
-                        QString mapindexd_Word = words.at(3);
-                        QString bank_Word = words.at(4);
-                        QString prog_Word = words.at(5);
-                        QString engine_Word = words.at(6);
-                        QString filepath_Word = words2.at(0);
-                        QString idont_Word = words.at(7);
-                        QString volume_Word = words.at(9);
-                        QString loadmode_Word = words.at(10);
-                        QString name_Word = words2.at(1);
-                        QList<QStandardItem*> items;
-                        //items << new QStandardItem();
-                        //items << new QStandardItem(mapindexd_Word);
-                        items << new QStandardItem(bank_Word);
-                        items << new QStandardItem(prog_Word);
-                        items << new QStandardItem(engine_Word);
-                        items << new QStandardItem(filepath_Word);
-                        items << new QStandardItem(volume_Word);
-                        items << new QStandardItem(loadmode_Word);
-                        items << new QStandardItem(name_Word);
-                        model->appendRow(items);
-                    }
-                    }else {
-                        break;
-                    }
-
-
-                }
-                // ui->tableView->setIndexWidget(model->index(1, 2), comboBox);
+                qDebug()<<maps.last();
+                mapsFinal.append(maps.last());
             }
-
-            /*
-                 else if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
-                     QStringList words = line.split(" "); //splitting the line by space
-                     words.removeFirst(); //removing the first element "ADD MIDI_INSTRUMENT_MAP"
-                     // Append the remaining words to plainTextEdit
-                     words.removeFirst();
-                     words.replaceInStrings("'", "");
-                     ui->comboBox->addItems(words);
-
-
-             }*/
-            /*else if (line.startsWith("MAP MIDI_INSTRUMENT")){
-
-                    QStringList words2 = line.split(" ");
-                 if (words2.length() > 4) {
-                     QString fifthWord = words2[4];
-
-                     // Do something with fifthWord
-                 }
-
-                 }*/
-
-            inputFile.close();
         }
+        qDebug()<<mapsFinal;
+        ui->map_comboBox->addItems(mapsFinal);
+        ui->map_comboBox->setCurrentIndex(0);
+        inputFile.close();
     }
-
 
 }
 
 void lscpedit::printMap(int mapIndex){
-    qDebug()<<mapIndex;
-    model->removeRows(0, model->rowCount());
 
+    model->removeRows(0, model->rowCount());
     QFile inputFile(*filename);
-    // QStandardItemModel *model = new QStandardItemModel(0,3);
-
-    QComboBox *comboBox = new QComboBox;
-    comboBox->addItem("Default 1");
-    comboBox->addItem("item 2");
-    comboBox->addItem("item 3");
-
-
-
-    if (inputFile.open(QIODevice::ReadWrite))
-    {
-        //int mapIndex=1;
-        QTextStream stream(&inputFile);
-        while (!stream.atEnd())
-        {
-            QString line = stream.readLine();
-            /*    if (line.startsWith("#")) {
-                     continue;
-                 }*/
-
-            if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
-                QStringList maps = extractWordsBetweenApostrophes(line);
-              //  ui->map_comboBox->addItem(maps.last());
-
-                while (!stream.atEnd()) {
-                    line = stream.readLine();
-
-                    if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-                        QStringList getIndex = line.split(" ");
-                        QString indexToInt = getIndex.at(3);
-
-                        int finalInt= indexToInt.toInt();
-                        if(finalInt==mapIndex)
-                        {
-                            //  QStringList words = splitLine(line);
-                            QStringList words2 = extractWordsBetweenApostrophes(line);
-                            QString modifiedLine = removeWordsBetweenApostrophes(line);
-
-                            QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
-
-                            QString mapindexd_Word = words.at(3);
-                            QString bank_Word = words.at(4);
-                            QString prog_Word = words.at(5);
-                            QString engine_Word = words.at(6);
-                            QString filepath_Word = words2.at(0);
-                            QString idont_Word = words.at(7);
-                            QString volume_Word = words.at(9);
-                            QString loadmode_Word = words.at(10);
-                            QString name_Word = words2.at(1);
-                            QList<QStandardItem*> items;
-                            //items << new QStandardItem();
-                            //items << new QStandardItem(mapindexd_Word);
-                            items << new QStandardItem(bank_Word);
-                            items << new QStandardItem(prog_Word);
-                            items << new QStandardItem(engine_Word);
-                            items << new QStandardItem(filepath_Word);
-                            items << new QStandardItem(volume_Word);
-                            items << new QStandardItem(loadmode_Word);
-                            items << new QStandardItem(name_Word);
-                            model->appendRow(items);
-                        }
-                    }else {
-                        break;
-                    }
-
-
-                }
-                // ui->tableView->setIndexWidget(model->index(1, 2), comboBox);
-            }
-
-            /*
-                 else if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
-                     QStringList words = line.split(" "); //splitting the line by space
-                     words.removeFirst(); //removing the first element "ADD MIDI_INSTRUMENT_MAP"
-                     // Append the remaining words to plainTextEdit
-                     words.removeFirst();
-                     words.replaceInStrings("'", "");
-                     ui->comboBox->addItems(words);
-
-
-             }*/
-            /*else if (line.startsWith("MAP MIDI_INSTRUMENT")){
-
-                    QStringList words2 = line.split(" ");
-                 if (words2.length() > 4) {
-                     QString fifthWord = words2[4];
-
-                     // Do something with fifthWord
-                 }
-
-                 }*/
-
-            inputFile.close();
-        }
-    }
-
-
-}
-/*
-
-void lscpedit::printFiletoTable(QString *file){
-
-    model->removeRows(0, model->rowCount());
-
-    QFile inputFile(*file);
-    // QStandardItemModel *model = new QStandardItemModel(0,3);
-
-    QComboBox *comboBox = new QComboBox;
-    comboBox->addItem("Default 1");
-    comboBox->addItem("item 2");
-    comboBox->addItem("item 3");
-
-
-
     if (inputFile.open(QIODevice::ReadOnly))
     {
-
         QTextStream stream(&inputFile);
         while (!stream.atEnd())
         {
             QString line = stream.readLine();
-
-
-            if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
-
-
-                while (!stream.atEnd()) {
-                    line = stream.readLine();
-                    if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-
-                        //  QStringList words = splitLine(line);
-                        QStringList words2 = extractWordsBetweenApostrophes(line);
-                        QString modifiedLine = removeWordsBetweenApostrophes(line);
-
-                        QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
-
-                        QString mapindexd_Word = words.at(3);
-                        QString bank_Word = words.at(4);
-                        QString prog_Word = words.at(5);
-                        QString engine_Word = words.at(6);
-                        QString filepath_Word = words2.at(0);
-                        QString idont_Word = words.at(7);
-                        QString volume_Word = words.at(9);
-                        QString loadmode_Word = words.at(10);
-                        QString name_Word = words2.at(1);
-                        QList<QStandardItem*> items;
-                        //items << new QStandardItem();
-                        //items << new QStandardItem(mapindexd_Word);
-                        items << new QStandardItem(bank_Word);
-                        items << new QStandardItem(prog_Word);
-                        items << new QStandardItem(engine_Word);
-                        items << new QStandardItem(filepath_Word);
-                        items << new QStandardItem(volume_Word);
-                        items << new QStandardItem(loadmode_Word);
-                        items << new QStandardItem(name_Word);
-                        model->appendRow(items);
-                    } else {
-                        break;
-                    }
-
-
+            if (line.startsWith("#"))
+                continue;
+            else if (line.isEmpty())
+                continue;
+            else if (line.startsWith("MAP MIDI_INSTRUMENT")) {
+                qDebug()<< "Found2";
+                QStringList getIndex = line.split(" ");
+                QString indexToInt = getIndex.at(3);
+                int finalInt= indexToInt.toInt();
+                qDebug()<< "Final int "<<finalInt;
+                if(finalInt==mapIndex)
+                {
+                    qDebug()<< "Found3 ";
+                    QStringList words2 = extractWordsBetweenApostrophes(line);
+                    QString modifiedLine = removeWordsBetweenApostrophes(line);
+                    QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
+                    QString mapindexd_Word = words.at(3);
+                    QString bank_Word = words.at(4);
+                    QString prog_Word = words.at(5);
+                    QString engine_Word = words.at(6);
+                    QString filepath_Word = words2.at(0);
+                    QString idont_Word = words.at(7);
+                    QString volume_Word = words.at(9);
+                    QString loadmode_Word = words.at(10);
+                    QString name_Word = words2.at(1);
+                    QList<QStandardItem*> items;
+                    //items << new QStandardItem();
+                    //items << new QStandardItem(mapindexd_Word);
+                    items << new QStandardItem(bank_Word);
+                    items << new QStandardItem(prog_Word);
+                    items << new QStandardItem(engine_Word);
+                    items << new QStandardItem(filepath_Word);
+                    items << new QStandardItem(volume_Word);
+                    items << new QStandardItem(loadmode_Word);
+                    items << new QStandardItem(name_Word);
+                    model->appendRow(items);
                 }
-                // ui->tableView->setIndexWidget(model->index(1, 2), comboBox);
             }
-
-
-            inputFile.close();
         }
+        inputFile.close();
     }
 
 
 }
-   */
+
 void lscpedit::on_actionOpen_triggered()
 {
 
@@ -469,26 +269,26 @@ void lscpedit::on_actionOpen_triggered()
 void lscpedit::getGigFileName(QString *insfile){
     QString filePath = *insfile;
     std::string gigFilePath =   filePath.toStdString();
-   //  std::string gigFilePath = "/home/akram/Mun.gig";
+    //  std::string gigFilePath = "/home/akram/Mun.gig";
     RIFF::File* riff = new RIFF::File(gigFilePath);
     gig::File* gig = new gig::File(riff);
     gig::Instrument* instr = gig->GetInstrument(0);
     QString fInstName = QString::fromStdString(instr->pInfo->Name);
-   // qDebug()<<fInstName;
-     ui->nameGig_lineEdit->setText(fInstName);
+    // qDebug()<<fInstName;
+    ui->nameGig_lineEdit->setText(fInstName);
     delete riff;
     delete gig;
 }
 void lscpedit::on_selectInstFile_pushButton_clicked()
 {
-   *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+    *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
     ui->instFilePath_lineEdit->setText(*gigFileName);
     // ui->nameGig_lineEdit->setText("Loading ...");
-   // getGigFileName(gigFileName);
+    // getGigFileName(gigFileName);
 
 }
 void lscpedit::addDataFromInputsToTableview(){
-     int current_engine  = ui->engine_comboBox->currentIndex();
+    int current_engine  = ui->engine_comboBox->currentIndex();
     QString engine_Word;
     switch(current_engine)
     {
@@ -524,31 +324,24 @@ void lscpedit::addDataFromInputsToTableview(){
         break;
     default:
         break;
-
     }
-
     QList<QStandardItem*> items;
     //items << new QStandardItem();
     //items << new QStandardItem(mapindexd_Word);
-    items << new QStandardItem(ui->bank_spinBox->value());
-    items << new QStandardItem(ui->prog_spinBox->value());
+    items << new QStandardItem(ui->bank_spinBox->text());
+    items << new QStandardItem(ui->prog_spinBox->text());
     items << new QStandardItem(engine_Word);
     items << new QStandardItem(ui->instFilePath_lineEdit->text());
-    items << new QStandardItem(ui->volume_doubleSpinBox->value());
+    items << new QStandardItem(ui->volume_doubleSpinBox->text());
     items << new QStandardItem(mode_Word);
     items << new QStandardItem(ui->nameGig_lineEdit->text());
     model->appendRow(items);
-
-
-
 }
-
-
 void lscpedit::on_actionSave_triggered()
 {qDebug()<<"work1";
     QFile inputFile(*filename);
     if (inputFile.open(QIODevice::ReadWrite)){
-         QTextStream stream(&inputFile);
+        QTextStream stream(&inputFile);
         qDebug()<<"work2";
         for (int i = 0; i < model->rowCount(); ++i) {
             qDebug()<<"work3";
@@ -562,10 +355,8 @@ void lscpedit::on_actionSave_triggered()
     }
 
 }
-
-
 void lscpedit::on_newItem_pushButton_clicked()
 {
-addDataFromInputsToTableview();
+    addDataFromInputsToTableview();
 }
 
