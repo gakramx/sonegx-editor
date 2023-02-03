@@ -100,7 +100,7 @@
              <item row="0" column="0">
               <widget class="QPushButton" name="newItem_pushButton">
                <property name="text">
-                <string>Add MIDI</string>
+                <string>Add  MIDI</string>
                </property>
               </widget>
              </item>
@@ -242,15 +242,22 @@
            <item row="4" column="3">
             <widget class="QSpinBox" name="prog_spinBox"/>
            </item>
-           <item row="0" column="3">
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="volume_doubleSpinBox"/>
+           </item>
+           <item row="0" column="2">
             <widget class="QCheckBox" name="autoCalc_checkBox">
              <property name="text">
               <string>Auto Calc</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="volume_doubleSpinBox"/>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="clearAll_pushButton">
+             <property name="text">
+              <string>Clear All</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

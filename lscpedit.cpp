@@ -182,6 +182,7 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
     QFile inputFile(*file);
     // QStandardItemModel *model = new QStandardItemModel(0,3);
     ui->map_comboBox->clear();
+    model->removeRows(0, model->rowCount());
     QComboBox *comboBox = new QComboBox;
     comboBox->addItem("Default 1");
     comboBox->addItem("item 2");
@@ -193,6 +194,7 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
     {
         //int mapIndex=1;
         QTextStream stream(&inputFile);
+
         while (!stream.atEnd())
         {
             QString line = stream.readLine();
@@ -480,8 +482,90 @@ void lscpedit::getGigFileName(QString *insfile){
 void lscpedit::on_selectInstFile_pushButton_clicked()
 {
    *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
-     ui->nameGig_lineEdit->setText("Loading ...");
+    ui->instFilePath_lineEdit->setText(*gigFileName);
+    // ui->nameGig_lineEdit->setText("Loading ...");
    // getGigFileName(gigFileName);
 
+}
+void lscpedit::addDataFromInputsToTableview(){
+     int current_engine  = ui->engine_comboBox->currentIndex();
+    QString engine_Word;
+    switch(current_engine)
+    {
+    case 0:
+        engine_Word="GIG";
+        break;
+    case 1:
+        engine_Word="SF2";
+        break;
+    case 2:
+        engine_Word="SFZ";
+        break;
+    default:
+        break;
+
+    }
+
+    int current_mode  = ui->loadMode_comboBox->currentIndex();
+    QString mode_Word;
+    switch(current_mode)
+    {
+    case 0:
+        mode_Word="ON_DEMAND";
+        break;
+    case 1:
+        mode_Word="ON_DEMAND";
+        break;
+    case 2:
+        mode_Word="ON_DEMAND_HOLD";
+        break;
+    case 3:
+        mode_Word="PERSISTENT";
+        break;
+    default:
+        break;
+
+    }
+
+    QList<QStandardItem*> items;
+    //items << new QStandardItem();
+    //items << new QStandardItem(mapindexd_Word);
+    items << new QStandardItem(ui->bank_spinBox->value());
+    items << new QStandardItem(ui->prog_spinBox->value());
+    items << new QStandardItem(engine_Word);
+    items << new QStandardItem(ui->instFilePath_lineEdit->text());
+    items << new QStandardItem(ui->volume_doubleSpinBox->value());
+    items << new QStandardItem(mode_Word);
+    items << new QStandardItem(ui->nameGig_lineEdit->text());
+    model->appendRow(items);
+
+
+
+}
+
+
+void lscpedit::on_actionSave_triggered()
+{qDebug()<<"work1";
+    QFile inputFile(*filename);
+    if (inputFile.open(QIODevice::ReadWrite)){
+         QTextStream stream(&inputFile);
+        qDebug()<<"work2";
+        for (int i = 0; i < model->rowCount(); ++i) {
+            qDebug()<<"work3";
+            QStandardItem *item = model->item(i, 0);
+            if (item->data(Qt::UserRole + 1).toBool()) {
+                qDebug()<<"work4";
+                qDebug()<<item->text();
+                stream << item->text() << endl;
+            }
+        }
+    }
+
+}
+
+
+void lscpedit::on_newItem_pushButton_clicked()
+{
+addDataFromInputsToTableview();
 }
 

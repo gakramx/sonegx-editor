@@ -29,12 +29,17 @@ QStringList extractWordsBetweenApostrophes(const QString& line);
 QString removeWordsBetweenApostrophes(const QString& line);
 void printFiletoTable(QString *file, int mapIndex);
 void getGigFileName(QString *insfile);
+void addDataFromInputsToTableview();
 private slots:
 
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
 void calcBank();
 void on_selectInstFile_pushButton_clicked();
+
+void on_actionSave_triggered();
+
+void on_newItem_pushButton_clicked();
 
 private:
     Ui::lscpedit *ui;
