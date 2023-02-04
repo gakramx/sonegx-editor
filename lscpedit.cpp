@@ -9,15 +9,10 @@
 #include<libgig/gig.h>
 
 
-
-#include <QComboBox>
-
 lscpedit::lscpedit(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::lscpedit)
 {
-
-
     ui->setupUi(this);
     setAcceptDrops(true);
     model = new QStandardItemModel(this);
@@ -31,6 +26,8 @@ lscpedit::lscpedit(QWidget *parent)
     model->setHorizontalHeaderItem(5, new QStandardItem("Load mode"));
     model->setHorizontalHeaderItem(6, new QStandardItem("Name"));
     ui->tableView->setModel(model);
+    ui->tableView->setSortingEnabled(true);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
     ui->bank_spinBox->setMaximum(16384);
@@ -253,10 +250,11 @@ void lscpedit::printMap(int mapIndex){
                 }
             }
         }
+        for (int i = 0; i < ui->tableView->model()->columnCount(); i++) {
+            ui->tableView->resizeColumnToContents(i);
+        }
         inputFile.close();
     }
-
-
 }
 
 void lscpedit::on_actionOpen_triggered()
@@ -303,7 +301,6 @@ void lscpedit::addDataFromInputsToTableview(){
         break;
     default:
         break;
-
     }
 
     int current_mode  = ui->loadMode_comboBox->currentIndex();
@@ -337,8 +334,8 @@ void lscpedit::addDataFromInputsToTableview(){
     items << new QStandardItem(ui->nameGig_lineEdit->text());
     model->appendRow(items);
 }
-void lscpedit::on_actionSave_triggered()
-{qDebug()<<"work1";
+void lscpedit::on_actionSave_triggered(){
+    qDebug()<<"work1";
     QFile inputFile(*filename);
     if (inputFile.open(QIODevice::ReadWrite)){
         QTextStream stream(&inputFile);
