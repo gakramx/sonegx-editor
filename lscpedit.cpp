@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QtConcurrent/QtConcurrent>
+#include <QMessageBox>
 #include <iostream>
 #include <string>
 
@@ -44,7 +45,8 @@ lscpedit::lscpedit(QWidget *parent)
     ui->loadMode_comboBox->addItems(loadMode_items);
 
 
-    QItemSelectionModel *selectionModel = ui->tableView->selectionModel();
+    //QItemSelectionModel *
+        selectionModel = ui->tableView->selectionModel();
 
     connect(selectionModel, &QItemSelectionModel::selectionChanged, [=](const QItemSelection &selected, const QItemSelection &deselected){
         QModelIndexList indexes = selected.indexes();
@@ -380,12 +382,13 @@ bool lscpedit::checkValueIfExist(){
 
         if (item->text().toInt() == bank && item2->text().toInt() == prog) {
             value1Exists = true;
-             // qDebug() << "bank" << item->text().toInt()  << ".";
-             // qDebug() << "Prog" << item2->text().toInt() << ".";
+                // qDebug() << "bank" << item->text().toInt()  << ".";
+                // qDebug() << "Prog" << item2->text().toInt() << ".";
         }
     }
     if (value1Exists) {
         qDebug() << "Value exists in all rows in column" << columnToCheck << ".";
+        QMessageBox::warning(this, "Error", "This Bank is exist");
         return true;
     } else {
         qDebug() << "Value does not exist in all rows in column" << columnToCheck << ".";
@@ -394,6 +397,40 @@ bool lscpedit::checkValueIfExist(){
 
 }
 
-
-
+QStringList lscpedit::createLinesFromTable(){
+    int currentMap=ui->map_comboBox->currentIndex();
+    QStringList lines;
+    QString bank;
+    QString prog;
+    QString engine;
+    QString file;
+    QString volume;
+    QString loadMode;
+    QString name;
+    QString line;
+    for (int row = 0; row < model->rowCount(); ++row) {
+        QStandardItem *bank_item = model->item(row, 0);
+        QStandardItem *prog_item = model->item(row, 1);
+        QStandardItem *engine_item = model->item(row, 2);
+        QStandardItem *file_item = model->item(row, 3);
+        QStandardItem *volume_item = model->item(row, 4);
+        QStandardItem *loadMode_item = model->item(row, 5);
+        QStandardItem *name_item = model->item(row, 6);
+        bank=bank_item->text();
+        prog=prog_item->text();
+        engine=engine_item->text();
+        file=file_item->text();
+        volume=volume_item->text();
+        loadMode=loadMode_item->text();
+        name=name_item->text();
+        line="MAP MIDI_INSTRUMENT NON_MODAL "+QString::number(currentMap)+" " +bank + " " +prog + " " +engine +" \'"+file+"\' "+"0 "+loadMode+" \'"+name+"\'";
+        lines.append(line);
+        qDebug()<<line;
+    }
+    return lines;
+}
+void lscpedit::on_saveItem_pushButton_clicked()
+{
+    createLinesFromTable();
+}
 
