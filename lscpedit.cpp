@@ -503,4 +503,26 @@ void lscpedit::on_deleteItem_pushButton_clicked()
 {
     deleteSelectedRows();
 }
+void lscpedit::on_newMap_pushButton_clicked()
+{
+   MapDialog mapdialog;
+   int result =  mapdialog.exec();
+    if (result == QDialog::Accepted) {
+       QString text = mapdialog.getMapName();
+        ui->map_comboBox->addItem(text);
+     }
+}
+
+void lscpedit::on_editMap_pushButton_clicked()
+{
+    MapDialog mapdialog;
+    mapdialog.setMapName(ui->map_comboBox->currentText());
+    int index = ui->map_comboBox->currentIndex();
+    int result = mapdialog.exec();
+    if (result == QDialog::Accepted) {
+       QString text = mapdialog.getMapName();
+       if (index != -1)
+           ui->map_comboBox->setItemText(index, text);
+    }
+}
 

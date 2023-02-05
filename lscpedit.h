@@ -8,6 +8,7 @@
 #include <QString>
 #include <QStringList>
 #include <QItemSelectionModel>
+#include "mapdialog.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
 QT_END_NAMESPACE
@@ -50,6 +51,10 @@ void on_newItem_pushButton_clicked();
 void on_saveItem_pushButton_clicked();
 
 void on_deleteItem_pushButton_clicked();
+
+void on_newMap_pushButton_clicked();
+
+void on_editMap_pushButton_clicked();
 
 private:
     Ui::lscpedit *ui;

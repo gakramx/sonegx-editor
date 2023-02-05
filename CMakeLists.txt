@@ -23,6 +23,9 @@ set(PROJECT_SOURCES
         main.cpp
         lscpedit.cpp
         lscpedit.h
+        mapdialog.cpp
+        mapdialog.h
+        mapdialog.ui
         lscpedit.ui
 )
 
