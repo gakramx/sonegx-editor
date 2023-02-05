@@ -31,6 +31,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
+    ui->volume_doubleSpinBox->setDecimals(1);
     ui->bank_spinBox->setMaximum(16384);
     ui->lsb_spinBox->setMaximum(128);
     ui->msb_spinBox->setMaximum(128);
@@ -423,7 +424,7 @@ QStringList lscpedit::createLinesFromTable(){
         volume=volume_item->text();
         loadMode=loadMode_item->text();
         name=name_item->text();
-        line="MAP MIDI_INSTRUMENT NON_MODAL "+QString::number(currentMap)+" " +bank + " " +prog + " " +engine +" \'"+file+"\' "+"0 "+loadMode+" \'"+name+"\'";
+        line="MAP MIDI_INSTRUMENT NON_MODAL "+QString::number(currentMap)+" " +bank + " " +prog + " " +engine +" \'"+file+"\' "+"0 "+volume+ " " +loadMode+" \'"+name+"\'";
         lines.append(line);
         qDebug()<<line;
     }
@@ -431,6 +432,73 @@ QStringList lscpedit::createLinesFromTable(){
 }
 void lscpedit::on_saveItem_pushButton_clicked()
 {
-    createLinesFromTable();
+   // createLinesFromTable();
+    int currentMap=ui->map_comboBox->currentIndex();
+    saveMapToFile(filename,currentMap);
 }
+void lscpedit::saveMapToFile(QString *file, int mapIndex){
+    QFile inputFile(*file);
+    QStringList lines;
+    int lineIndex = -1;
+    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&inputFile);
+        while (!stream.atEnd()) {
+            QString line = stream.readLine();
+            if (line.startsWith("MAP MIDI_INSTRUMENT")) {
+                QStringList words = line.split(" ");
+                QString indexToInt = words.at(3);
+                int finalInt= indexToInt.toInt();
+                if (finalInt == mapIndex) {
+                    if (lineIndex == -1) {
+                        lineIndex = lines.count();
+                    }
+                } else {
+                    lines << line;
+                }
+            } else {
+                lines << line;
+            }
+        }
+        inputFile.close();
+    }
+    QStringList newLines = createLinesFromTable();
+   // lines.insert(lineIndex, newLines);
+    for (const QString &newLine : newLines) {
+        lines.insert(lineIndex, newLine);
+        ++lineIndex;
+    }
+    if (inputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream stream(&inputFile);
+        for (const QString &line : lines) {
+            stream << line << endl;
+        }
+        inputFile.close();
+    }
+    /*
+    if (inputFile.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&inputFile);
+        while (!stream.atEnd())
+        {
+            QString line = stream.readLine();
+            if (line.startsWith("#"))
+                continue;
+            else if (line.isEmpty())
+                continue;
+            else if (line.startsWith("MAP MIDI_INSTRUMENT")) {
+                qDebug()<< "Found2";
+                QStringList getIndex = line.split(" ");
+                QString indexToInt = getIndex.at(3);
+                int finalInt= indexToInt.toInt();
+                qDebug()<< "Final int "<<finalInt;
+                if(finalInt==mapIndex)
+                {
 
+                }
+            }
+        }
+        }
+        inputFile.close();
+    }
+*/
+}

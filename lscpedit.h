@@ -34,6 +34,7 @@ int addDataFromInputsToTableview();
 bool checkValueIfExist();
 QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
+void saveMapToFile(QString *file, int mapIndex);
 private slots:
 
 void printMap(int mapIndex);
