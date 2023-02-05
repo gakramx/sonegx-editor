@@ -29,7 +29,8 @@ QStringList extractWordsBetweenApostrophes(const QString& line);
 QString removeWordsBetweenApostrophes(const QString& line);
 void printFiletoTable(QString *file, int mapIndex);
 void getGigFileName(QString *insfile);
-void addDataFromInputsToTableview();
+int addDataFromInputsToTableview();
+bool checkValueIfExist();
 private slots:
 
 void printMap(int mapIndex);

@@ -285,8 +285,10 @@ void lscpedit::on_selectInstFile_pushButton_clicked()
     // getGigFileName(gigFileName);
 
 }
-void lscpedit::addDataFromInputsToTableview(){
+int lscpedit::addDataFromInputsToTableview(){
     int current_engine  = ui->engine_comboBox->currentIndex();
+    if(checkValueIfExist())
+        return 1;
     QString engine_Word;
     switch(current_engine)
     {
@@ -333,6 +335,8 @@ void lscpedit::addDataFromInputsToTableview(){
     items << new QStandardItem(mode_Word);
     items << new QStandardItem(ui->nameGig_lineEdit->text());
     model->appendRow(items);
+
+    return 0;
 }
 void lscpedit::on_actionSave_triggered(){
     qDebug()<<"work1";
@@ -356,4 +360,40 @@ void lscpedit::on_newItem_pushButton_clicked()
 {
     addDataFromInputsToTableview();
 }
+
+bool lscpedit::checkValueIfExist(){
+
+    // Get the value to check for from the line edit
+    int bank = ui->bank_spinBox->value();
+    int prog = ui->prog_spinBox->value();
+    // The column to check (e.g. column 1)
+    int columnToCheck = 0;
+    int columnToCheck2 = 1;
+    // Check if the value exist in all the rows in the specified column
+
+    bool value1Exists = false;
+
+    for (int row = 0; row < model->rowCount(); ++row) {
+        QStandardItem *item = model->item(row, columnToCheck);
+        QStandardItem *item2 = model->item(row, columnToCheck2);
+
+
+        if (item->text().toInt() == bank && item2->text().toInt() == prog) {
+            value1Exists = true;
+             // qDebug() << "bank" << item->text().toInt()  << ".";
+             // qDebug() << "Prog" << item2->text().toInt() << ".";
+        }
+    }
+    if (value1Exists) {
+        qDebug() << "Value exists in all rows in column" << columnToCheck << ".";
+        return true;
+    } else {
+        qDebug() << "Value does not exist in all rows in column" << columnToCheck << ".";
+        return false;
+    }
+
+}
+
+
+
 
