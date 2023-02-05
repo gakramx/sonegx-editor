@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 #include<libgig/gig.h>
 
@@ -47,7 +48,7 @@ lscpedit::lscpedit(QWidget *parent)
 
 
     //QItemSelectionModel *
-        selectionModel = ui->tableView->selectionModel();
+    selectionModel = ui->tableView->selectionModel();
 
     connect(selectionModel, &QItemSelectionModel::selectionChanged, [=](const QItemSelection &selected, const QItemSelection &deselected){
         QModelIndexList indexes = selected.indexes();
@@ -432,7 +433,7 @@ QStringList lscpedit::createLinesFromTable(){
 }
 void lscpedit::on_saveItem_pushButton_clicked()
 {
-   // createLinesFromTable();
+    // createLinesFromTable();
     int currentMap=ui->map_comboBox->currentIndex();
     saveMapToFile(filename,currentMap);
 }
@@ -462,7 +463,7 @@ void lscpedit::saveMapToFile(QString *file, int mapIndex){
         inputFile.close();
     }
     QStringList newLines = createLinesFromTable();
-   // lines.insert(lineIndex, newLines);
+    // lines.insert(lineIndex, newLines);
     for (const QString &newLine : newLines) {
         lines.insert(lineIndex, newLine);
         ++lineIndex;
@@ -474,31 +475,32 @@ void lscpedit::saveMapToFile(QString *file, int mapIndex){
         }
         inputFile.close();
     }
-    /*
-    if (inputFile.open(QIODevice::WriteOnly))
-    {
-        QTextStream stream(&inputFile);
-        while (!stream.atEnd())
-        {
-            QString line = stream.readLine();
-            if (line.startsWith("#"))
-                continue;
-            else if (line.isEmpty())
-                continue;
-            else if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-                qDebug()<< "Found2";
-                QStringList getIndex = line.split(" ");
-                QString indexToInt = getIndex.at(3);
-                int finalInt= indexToInt.toInt();
-                qDebug()<< "Final int "<<finalInt;
-                if(finalInt==mapIndex)
-                {
-
-                }
-            }
-        }
-        }
-        inputFile.close();
-    }
-*/
 }
+void lscpedit::deleteSelectedRows(){
+
+    QAbstractItemModel *model = ui->tableView->model();
+    QItemSelectionModel *selectionModel = ui->tableView->selectionModel();
+    QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    std::vector<int> rowsToRemove;
+    for (const QModelIndex &index : selectedIndexes) {
+        int row = index.row();
+        auto it = std::find(rowsToRemove.begin(), rowsToRemove.end(), row);
+        if (it == rowsToRemove.end())
+            rowsToRemove.push_back(row);
+    }
+
+    std::sort(rowsToRemove.begin(), rowsToRemove.end(), std::greater<int>());
+    for (int row : rowsToRemove) {
+        model->removeRow(row);
+    }
+}
+
+void lscpedit::on_deleteItem_pushButton_clicked()
+{
+    deleteSelectedRows();
+}
+

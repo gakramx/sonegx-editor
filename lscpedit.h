@@ -35,6 +35,7 @@ bool checkValueIfExist();
 QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
 void saveMapToFile(QString *file, int mapIndex);
+void deleteSelectedRows();
 private slots:
 
 void printMap(int mapIndex);
@@ -47,6 +48,8 @@ void on_actionSave_triggered();
 void on_newItem_pushButton_clicked();
 
 void on_saveItem_pushButton_clicked();
+
+void on_deleteItem_pushButton_clicked();
 
 private:
     Ui::lscpedit *ui;
