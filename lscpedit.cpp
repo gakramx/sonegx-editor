@@ -4,10 +4,9 @@
 #include <QTextStream>
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
+
 #include <iostream>
 #include <string>
-
-#include <QDesktopWidget>
 #include<libgig/gig.h>
 
 
@@ -419,12 +418,11 @@ QStringList lscpedit::createLinesFromTable(){
 }
 void lscpedit::on_saveItem_pushButton_clicked()
 {
-
     saveMapToFile(filename);
 }
 int lscpedit::saveMapToFile(QString *file){
-   QString map= ui->map_comboBox->currentText();
-        QFile inputFile(*file);
+    QString map= ui->map_comboBox->currentText();
+    QFile inputFile(*file);
     if (!inputFile.open(QIODevice::ReadWrite | QIODevice::Text))
         return -1;
 
@@ -435,7 +433,7 @@ int lscpedit::saveMapToFile(QString *file){
         lines.append(line);
     }
 
-QStringList newLines = createLinesFromTable();
+    QStringList newLines = createLinesFromTable();
     for (int i = 0; i < lines.size(); i++) {
         if (lines[i].startsWith("ADD MIDI_INSTRUMENT_MAP")) {
             QStringList parts = lines[i].split(" ");
@@ -511,7 +509,7 @@ void lscpedit::on_editMap_pushButton_clicked()
         QString text = mapdialog.getMapName();
         if (index != -1)
             renameMap(filename,mapName,text);
-            ui->map_comboBox->setItemText(index, text);
+        ui->map_comboBox->setItemText(index, text);
     }
 }
 void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& newName){
@@ -519,7 +517,7 @@ void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& ne
 
     QString newLine = "ADD MIDI_INSTRUMENT_MAP \'"+newName+"\'";
 
-  QFile inputFile(*file);
+    QFile inputFile(*file);
     if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
 
@@ -545,7 +543,95 @@ void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& ne
     QTextStream out(&inputFile);
     for (const QString &line : lines)
         out << line << "\n";
-
     inputFile.close();
 
 }
+int lscpedit::removeMap(QString *file, const QString &mapName){
+    QFile inputFile(*file);
+    QStringList lines;
+    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&inputFile);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+                QStringList words = line.split(" ");
+                QString thirdWord = words[2];
+                thirdWord.remove("'");
+                if (thirdWord == mapName) {
+                    while (!in.atEnd()) {
+                        line = in.readLine();
+                        if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+                            lines.append(line);
+                            break;
+                        }
+                    }
+                } else {
+                    lines.append(line);
+                }
+            } else {
+                lines.append(line);
+            }
+        }
+        inputFile.close();
+    }
+    if (inputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&inputFile);
+        for (const QString &line : lines) {
+            out << line << endl;
+        }
+        inputFile.close();
+    }
+    return 0;
+}
+
+void lscpedit::on_deletMap_pushButton_clicked()
+{
+
+
+    QString mapName=ui->map_comboBox->currentText();
+    int mapIndex=ui->map_comboBox->currentIndex();
+
+    removeMap(filename,mapName);
+
+
+     int count=ui->map_comboBox->count();
+     for (int i = mapIndex; i < count; i++) {
+         qDebug()<<i;
+
+         orderMapIndex(filename,i+1,i);
+     }
+     ui->map_comboBox->removeItem(mapIndex);
+}
+int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
+   QFile inputFile(*file);
+    if (!inputFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        return 1;
+    }
+
+    QTextStream in(&inputFile);
+    QStringList lines;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("MAP MIDI_INSTRUMENT")) {
+            QStringList words = line.split(" ");
+
+            QString indexToInt = words.at(3);
+            int finalInt= indexToInt.toInt();
+            if (finalInt == currentIndex) {
+                words[3] = QString::number(newIndex);
+                line = words.join(" ");
+            }
+        }
+        lines.append(line);
+    }
+
+    inputFile.resize(0);
+    QTextStream out(&inputFile);
+    for (const QString &line : lines) {
+        out << line << endl;
+    }
+
+    inputFile.close();
+    return 0;
+}
+

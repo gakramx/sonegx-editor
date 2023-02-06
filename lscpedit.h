@@ -38,6 +38,8 @@ QStringList createLinesFromTable();
 int saveMapToFile(QString *file);
 void deleteSelectedRows();
 void renameMap(QString *file,const QString& oldName ,const QString& newName);
+int removeMap(QString *file,const QString& mapName);
+int orderMapIndex(QString *file, int currentIndex , int newIndex);
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
@@ -55,6 +57,8 @@ void on_deleteItem_pushButton_clicked();
 void on_newMap_pushButton_clicked();
 
 void on_editMap_pushButton_clicked();
+
+void on_deletMap_pushButton_clicked();
 
 private:
     Ui::lscpedit *ui;
