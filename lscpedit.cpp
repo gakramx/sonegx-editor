@@ -6,8 +6,8 @@
 #include <QMessageBox>
 #include <iostream>
 #include <string>
-#include <unordered_set>
 
+#include <QDesktopWidget>
 #include<libgig/gig.h>
 
 
@@ -435,46 +435,48 @@ void lscpedit::on_saveItem_pushButton_clicked()
 {
     // createLinesFromTable();
     int currentMap=ui->map_comboBox->currentIndex();
-    saveMapToFile(filename,currentMap);
+    saveMapToFile(filename);
 }
-void lscpedit::saveMapToFile(QString *file, int mapIndex){
-    QFile inputFile(*file);
+int lscpedit::saveMapToFile(QString *file){
+   QString map= ui->map_comboBox->currentText();
+        QFile inputFile(*file);
+    if (!inputFile.open(QIODevice::ReadWrite | QIODevice::Text))
+        return -1;
+
     QStringList lines;
-    int lineIndex = -1;
-    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream stream(&inputFile);
-        while (!stream.atEnd()) {
-            QString line = stream.readLine();
-            if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-                QStringList words = line.split(" ");
-                QString indexToInt = words.at(3);
-                int finalInt= indexToInt.toInt();
-                if (finalInt == mapIndex) {
-                    if (lineIndex == -1) {
-                        lineIndex = lines.count();
+    QTextStream stream(&inputFile);
+    while (!stream.atEnd()) {
+        QString line = stream.readLine();
+        lines.append(line);
+    }
+
+QStringList newLines = createLinesFromTable();
+    for (int i = 0; i < lines.size(); i++) {
+        if (lines[i].startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+            QStringList parts = lines[i].split(" ");
+            if (parts.count() >= 3) {
+                QString thirdWord = parts[2];
+                thirdWord.remove("'");
+                qDebug()<<thirdWord;
+                if (thirdWord == map) {
+                    int j = i + 1;
+                    while (j < lines.size() && !lines[j].startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+                        lines.removeAt(j);
                     }
-                } else {
-                    lines << line;
+                    //lines.insert(i + 1, newLines);
+                    int lineIndex = i + 1;
+                    for (const QString &newLine : newLines) {
+                        lines.insert(lineIndex, newLine);
+                        ++lineIndex;
+                    }
                 }
-            } else {
-                lines << line;
             }
         }
-        inputFile.close();
     }
-    QStringList newLines = createLinesFromTable();
-    // lines.insert(lineIndex, newLines);
-    for (const QString &newLine : newLines) {
-        lines.insert(lineIndex, newLine);
-        ++lineIndex;
-    }
-    if (inputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream stream(&inputFile);
-        for (const QString &line : lines) {
-            stream << line << endl;
-        }
-        inputFile.close();
-    }
+
+    inputFile.resize(0);
+    stream << lines.join("\n");
+    inputFile.close();
 }
 void lscpedit::deleteSelectedRows(){
 
@@ -505,12 +507,12 @@ void lscpedit::on_deleteItem_pushButton_clicked()
 }
 void lscpedit::on_newMap_pushButton_clicked()
 {
-   MapDialog mapdialog;
-   int result =  mapdialog.exec();
+    MapDialog mapdialog;
+    int result = mapdialog.exec();
     if (result == QDialog::Accepted) {
-       QString text = mapdialog.getMapName();
+        QString text = mapdialog.getMapName();
         ui->map_comboBox->addItem(text);
-     }
+    }
 }
 
 void lscpedit::on_editMap_pushButton_clicked()
@@ -520,9 +522,12 @@ void lscpedit::on_editMap_pushButton_clicked()
     int index = ui->map_comboBox->currentIndex();
     int result = mapdialog.exec();
     if (result == QDialog::Accepted) {
-       QString text = mapdialog.getMapName();
-       if (index != -1)
-           ui->map_comboBox->setItemText(index, text);
+        QString text = mapdialog.getMapName();
+        if (index != -1)
+            ui->map_comboBox->setItemText(index, text);
     }
 }
+void lscpedit::renameMap(QString *file){
 
+
+}

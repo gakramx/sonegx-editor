@@ -35,10 +35,10 @@ int addDataFromInputsToTableview();
 bool checkValueIfExist();
 QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
-void saveMapToFile(QString *file, int mapIndex);
+int saveMapToFile(QString *file);
 void deleteSelectedRows();
+void renameMap(QString *file);
 private slots:
-
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
 void calcBank();

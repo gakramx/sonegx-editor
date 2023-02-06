@@ -6,6 +6,7 @@ MapDialog::MapDialog(QWidget *parent) :
     ui(new Ui::MapDialog)
 {
     ui->setupUi(this);
+    this->setWindowFlag(Qt::FramelessWindowHint);
 }
 
 MapDialog::~MapDialog()
