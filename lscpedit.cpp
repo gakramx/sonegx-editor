@@ -343,21 +343,7 @@ int lscpedit::addDataFromInputsToTableview(){
     return 0;
 }
 void lscpedit::on_actionSave_triggered(){
-    qDebug()<<"work1";
-    QFile inputFile(*filename);
-    if (inputFile.open(QIODevice::ReadWrite)){
-        QTextStream stream(&inputFile);
-        qDebug()<<"work2";
-        for (int i = 0; i < model->rowCount(); ++i) {
-            qDebug()<<"work3";
-            QStandardItem *item = model->item(i, 0);
-            if (item->data(Qt::UserRole + 1).toBool()) {
-                qDebug()<<"work4";
-                qDebug()<<item->text();
-                stream << item->text() << endl;
-            }
-        }
-    }
+
 
 }
 void lscpedit::on_newItem_pushButton_clicked()
@@ -433,8 +419,7 @@ QStringList lscpedit::createLinesFromTable(){
 }
 void lscpedit::on_saveItem_pushButton_clicked()
 {
-    // createLinesFromTable();
-    int currentMap=ui->map_comboBox->currentIndex();
+
     saveMapToFile(filename);
 }
 int lscpedit::saveMapToFile(QString *file){
@@ -473,7 +458,6 @@ QStringList newLines = createLinesFromTable();
             }
         }
     }
-
     inputFile.resize(0);
     stream << lines.join("\n");
     inputFile.close();
@@ -518,16 +502,50 @@ void lscpedit::on_newMap_pushButton_clicked()
 void lscpedit::on_editMap_pushButton_clicked()
 {
     MapDialog mapdialog;
-    mapdialog.setMapName(ui->map_comboBox->currentText());
+    QString mapName=ui->map_comboBox->currentText();
+    mapdialog.setMapName(mapName);
     int index = ui->map_comboBox->currentIndex();
     int result = mapdialog.exec();
+
     if (result == QDialog::Accepted) {
         QString text = mapdialog.getMapName();
         if (index != -1)
+            renameMap(filename,mapName,text);
             ui->map_comboBox->setItemText(index, text);
     }
 }
-void lscpedit::renameMap(QString *file){
+void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& newName){
+    saveMapToFile(file);
 
+    QString newLine = "ADD MIDI_INSTRUMENT_MAP \'"+newName+"\'";
+
+  QFile inputFile(*file);
+    if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QStringList lines;
+    QTextStream in(&inputFile);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
+            QStringList words = line.split(" ");
+            QString thirdWord = words[2];
+            thirdWord.remove("'");
+            if (thirdWord == oldName)
+                line = newLine;
+        }
+        lines << line;
+    }
+
+    inputFile.close();
+
+    if (!inputFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    QTextStream out(&inputFile);
+    for (const QString &line : lines)
+        out << line << "\n";
+
+    inputFile.close();
 
 }

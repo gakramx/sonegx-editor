@@ -37,7 +37,7 @@ QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
 int saveMapToFile(QString *file);
 void deleteSelectedRows();
-void renameMap(QString *file);
+void renameMap(QString *file,const QString& oldName ,const QString& newName);
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
