@@ -45,6 +45,7 @@ int removeMap(QString *file,const QString& mapName);
 int orderMapIndex(QString *file, int currentIndex , int newIndex);
 bool addMapToComboBox(const QString &item);
 bool checkIfMapExist(const QString &item);
+int addNewMaptoFile(QString *file,const QString& mapName);
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();

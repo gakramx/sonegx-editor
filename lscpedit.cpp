@@ -511,6 +511,11 @@ void lscpedit::on_newMap_pushButton_clicked()
         if (result == QDialog::Accepted) {
             QString text = mapdialog.getMapName();
             added=addMapToComboBox(text);
+            if(added)
+            {
+                ui->map_comboBox->addItem(text);
+                addNewMaptoFile(filename,text);
+            }
         }
         else
             break;
@@ -740,7 +745,8 @@ bool lscpedit::addMapToComboBox(const QString &item){
 
     int index = ui->map_comboBox->findText(item);
     if (index == -1) {
-        ui->map_comboBox->addItem(item);
+
+
         return true;
     } else {
         QMessageBox::warning(this, "Map already exists", "The map you are trying to add already exists in the list");
@@ -758,4 +764,27 @@ bool lscpedit::checkIfMapExist(const QString &item){
         return false;
     }
 
+}
+int lscpedit::addNewMaptoFile(QString *file,const QString& mapName){
+
+    QFile inputFile(*file);
+    if (!inputFile.open(QIODevice::ReadWrite | QIODevice::Text))
+        return 1;
+
+    QTextStream in(&inputFile);
+    QStringList lines;
+    while (!in.atEnd()) {
+        lines.append(in.readLine());
+    }
+    // Go to the end of the file
+    inputFile.seek(inputFile.size());
+
+    // Add a new line
+    QTextStream out(&inputFile);
+    out << "\n" << "ADD MIDI_INSTRUMENT_MAP \'"+mapName+"\'";
+
+    // Close the file
+    inputFile.close();
+
+    return 0;
 }
