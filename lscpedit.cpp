@@ -33,11 +33,12 @@ lscpedit::lscpedit(QWidget *parent)
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
     ui->volume_doubleSpinBox->setDecimals(1);
+    ui->volume_doubleSpinBox->setValue(1.1);
     ui->bank_spinBox->setMaximum(16384);
     ui->lsb_spinBox->setMaximum(128);
     ui->msb_spinBox->setMaximum(128);
     ui->prog_spinBox->setMaximum(128);
-
+    ui->autoCalc_checkBox->setChecked(true);
     QStringList engine_items;
     engine_items << "GIG Engine" << "SF2 Engine" << "SFZ Engine";
     ui->engine_comboBox->addItems(engine_items);
@@ -206,7 +207,7 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
 }
 
 void lscpedit::printMap(int mapIndex){
-    saveMapToFile(filename);
+
     model->removeRows(0, model->rowCount());
     QFile inputFile(*filename);
     if (inputFile.open(QIODevice::ReadOnly))
@@ -503,27 +504,42 @@ void lscpedit::on_deleteItem_pushButton_clicked()
 }
 void lscpedit::on_newMap_pushButton_clicked()
 {
-    MapDialog mapdialog;
-    int result = mapdialog.exec();
-    if (result == QDialog::Accepted) {
-        QString text = mapdialog.getMapName();
-        ui->map_comboBox->addItem(text);
+    bool added=false;
+    while(!added){
+        MapDialog mapdialog;
+        int result = mapdialog.exec();
+        if (result == QDialog::Accepted) {
+            QString text = mapdialog.getMapName();
+            added=addMapToComboBox(text);
+        }
+        else
+            break;
     }
 }
 
 void lscpedit::on_editMap_pushButton_clicked()
 {
-    MapDialog mapdialog;
-    QString mapName=ui->map_comboBox->currentText();
-    mapdialog.setMapName(mapName);
-    int index = ui->map_comboBox->currentIndex();
-    int result = mapdialog.exec();
+    bool renamed=false;
 
-    if (result == QDialog::Accepted) {
-        QString text = mapdialog.getMapName();
-        if (index != -1)
-            renameMap(filename,mapName,text);
-        ui->map_comboBox->setItemText(index, text);
+    QString mapName=ui->map_comboBox->currentText();
+
+    int index = ui->map_comboBox->currentIndex();
+
+    while(!renamed){
+        MapDialog mapdialog;
+        mapdialog.setMapName(mapName);
+         int result = mapdialog.exec();
+        if (result == QDialog::Accepted) {
+            QString text = mapdialog.getMapName();
+            renamed=checkIfMapExist(text);
+            if(renamed){
+                if (index != -1)
+                    renameMap(filename,mapName,text);
+                ui->map_comboBox->setItemText(index, text);
+            }
+        }
+        else
+            break;
     }
 }
 void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& newName){
@@ -608,16 +624,16 @@ void lscpedit::on_deletMap_pushButton_clicked()
     removeMap(filename,mapName);
 
 
-     int count=ui->map_comboBox->count();
-     for (int i = mapIndex; i < count; i++) {
-         qDebug()<<i;
+    int count=ui->map_comboBox->count();
+    for (int i = mapIndex; i < count; i++) {
+        qDebug()<<i;
 
-         orderMapIndex(filename,i+1,i);
-     }
-     ui->map_comboBox->removeItem(mapIndex);
+        orderMapIndex(filename,i+1,i);
+    }
+    ui->map_comboBox->removeItem(mapIndex);
 }
 int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
-   QFile inputFile(*file);
+    QFile inputFile(*file);
     if (!inputFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
         return 1;
     }
@@ -716,5 +732,30 @@ bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
 void lscpedit::on_clearAll_pushButton_clicked()
 {
     ui->tableView->clearSelection();
-}
+    *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+    ui->instFilePath_lineEdit->setText(*gigFileName);
 
+}
+bool lscpedit::addMapToComboBox(const QString &item){
+
+    int index = ui->map_comboBox->findText(item);
+    if (index == -1) {
+        ui->map_comboBox->addItem(item);
+        return true;
+    } else {
+        QMessageBox::warning(this, "Map already exists", "The map you are trying to add already exists in the list");
+        return false;
+    }
+
+}
+bool lscpedit::checkIfMapExist(const QString &item){
+
+    int index = ui->map_comboBox->findText(item);
+    if (index == -1) {
+        return true;
+    } else {
+        QMessageBox::warning(this, "Map name already exists", "The map you are trying to rename already exists in the list");
+        return false;
+    }
+
+}
