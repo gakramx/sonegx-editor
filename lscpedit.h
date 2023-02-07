@@ -48,6 +48,7 @@ bool checkIfMapExist(const QString &item);
 int addNewMaptoFile(QString *file,const QString& mapName);
 bool isFileSaved(QString *originalFileName, QString *tempFileName);
 void saveFile();
+void removeFile(QString *file);
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();

@@ -821,6 +821,7 @@ void lscpedit::closeEvent(QCloseEvent *event)
         event->accept();
     } else if (result == QMessageBox::No) {
         event->accept();
+        removeFile(filename);
     } else {
         event->ignore();
     }
@@ -828,4 +829,10 @@ void lscpedit::closeEvent(QCloseEvent *event)
 }
 void lscpedit::saveFile(){
     saveChangesToFile(originalFileName,filename);
+}
+void lscpedit::removeFile(QString *file){
+    if (QFile::exists(*file)) {
+        QFile::remove(*file);
+    }
+
 }
