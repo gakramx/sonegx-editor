@@ -785,6 +785,47 @@ int lscpedit::addNewMaptoFile(QString *file,const QString& mapName){
 
     // Close the file
     inputFile.close();
-
     return 0;
+}
+bool lscpedit::isFileSaved(QString *originalFileName, QString *tempFileName){
+    QFile originalFile(*originalFileName);
+    if (!originalFile.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+
+    // Read the contents of the original file
+    QTextStream originalIn(&originalFile);
+    QString originalContents = originalIn.readAll();
+    originalFile.close();
+
+    // Read the contents of the temporary file
+    QFile tempFile(*tempFileName);
+    if (!tempFile.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+    QTextStream tempIn(&tempFile);
+    QString tempContents = tempIn.readAll();
+    tempFile.close();
+
+    // Compare the contents of the original file and the temporary file
+    return (originalContents == tempContents);
+}
+void lscpedit::closeEvent(QCloseEvent *event)
+{
+    bool isSaved=isFileSaved(originalFileName,filename);
+    if(!isSaved){
+    int result = QMessageBox::warning(this, "Save Confirmation", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    if (result == QMessageBox::Yes) {
+        // run the save function here
+        saveFile();
+        event->accept();
+    } else if (result == QMessageBox::No) {
+        event->accept();
+    } else {
+        event->ignore();
+    }
+    }
+}
+void lscpedit::saveFile(){
+    saveChangesToFile(originalFileName,filename);
 }

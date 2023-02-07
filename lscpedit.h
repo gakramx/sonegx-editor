@@ -46,6 +46,8 @@ int orderMapIndex(QString *file, int currentIndex , int newIndex);
 bool addMapToComboBox(const QString &item);
 bool checkIfMapExist(const QString &item);
 int addNewMaptoFile(QString *file,const QString& mapName);
+bool isFileSaved(QString *originalFileName, QString *tempFileName);
+void saveFile();
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
@@ -67,7 +69,8 @@ void on_editMap_pushButton_clicked();
 void on_deletMap_pushButton_clicked();
 
 void on_clearAll_pushButton_clicked();
-
+protected:
+    void closeEvent(QCloseEvent *event) override;
 private:
     Ui::lscpedit *ui;
 };
