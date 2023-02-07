@@ -18,6 +18,7 @@ lscpedit::lscpedit(QWidget *parent)
     setAcceptDrops(true);
     model = new QStandardItemModel(this);
     filename = new QString();
+    originalFileName = new QString();
     gigFileName = new QString();
     model->setHorizontalHeaderItem(0, new QStandardItem("Bank"));
     model->setHorizontalHeaderItem(1, new QStandardItem("Prog"));
@@ -205,7 +206,7 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
 }
 
 void lscpedit::printMap(int mapIndex){
-
+    saveMapToFile(filename);
     model->removeRows(0, model->rowCount());
     QFile inputFile(*filename);
     if (inputFile.open(QIODevice::ReadOnly))
@@ -263,8 +264,14 @@ void lscpedit::printMap(int mapIndex){
 void lscpedit::on_actionOpen_triggered()
 {
 
-    *filename = QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("lscp File(*.lscp)"));
-
+    *originalFileName = QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("lscp File(*.lscp)"));
+    QFileInfo fileInfo(*originalFileName);
+    QString directoryPath = fileInfo.absolutePath();
+    QString name = fileInfo.fileName();
+    *filename=directoryPath+"/.~"+name;
+    qDebug()<<"File name :"<<*originalFileName;
+    qDebug()<<"File temp :"<<*filename;
+    createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
 }
 void lscpedit::getGigFileName(QString *insfile){
@@ -342,12 +349,18 @@ int lscpedit::addDataFromInputsToTableview(){
     return 0;
 }
 void lscpedit::on_actionSave_triggered(){
-
-
+    saveChangesToFile(originalFileName,filename);
+    QFileInfo fileInfo(*originalFileName);
+    QString directoryPath = fileInfo.absolutePath();
+    QString name = fileInfo.fileName();
+    *filename=directoryPath+"/.~"+name;
+    createTempFile(originalFileName,filename);
+    printFiletoTable(filename,0);
 }
 void lscpedit::on_newItem_pushButton_clicked()
 {
     addDataFromInputsToTableview();
+    saveMapToFile(filename);
 }
 
 bool lscpedit::checkValueIfExist(){
@@ -486,6 +499,7 @@ void lscpedit::deleteSelectedRows(){
 void lscpedit::on_deleteItem_pushButton_clicked()
 {
     deleteSelectedRows();
+    saveMapToFile(filename);
 }
 void lscpedit::on_newMap_pushButton_clicked()
 {
@@ -633,5 +647,74 @@ int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
 
     inputFile.close();
     return 0;
+}
+void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
+    // Open the original file
+    QFile file(*originalFile);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // Handle error opening file
+        return;
+    }
+    // Read the contents of the original file
+    QTextStream in(&file);
+    QString contents = in.readAll();
+    file.close();
+    // Make a copy of the original file as the temp file
+    QFile temp(*tempFile);
+    if (!temp.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        // Handle error opening temp file
+        return;
+    }
+    // Write the contents of the original file to the temp file
+    QTextStream out(&temp);
+    out << contents;
+    temp.close();
+}
+bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
+    // Open the original file
+    QFile file(*originalFile);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // Handle error opening file
+        return false;
+    }
+
+    // Read the contents of the original file
+    QTextStream in(&file);
+    QString originalContents = in.readAll();
+    file.close();
+
+    // Open the temp file
+    QFile temp(*tempFile);
+    if (!temp.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // Handle error opening temp file
+        return false;
+    }
+
+    // Read the contents of the temp file
+    QTextStream tempIn(&temp);
+    QString tempContents = tempIn.readAll();
+    temp.close();
+
+    // Compare the contents of the original and temp files
+    bool changesMade = originalContents != tempContents;
+
+    if (changesMade) {
+        // Changes have been made, save them to the original file
+        if (!temp.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            // Handle error opening temp file
+            return false;
+        }
+        QTextStream tempOut(&temp);
+        tempOut << tempContents;
+        temp.close();
+
+        QFile::remove(*originalFile);
+        temp.rename(*originalFile);
+    }
+    return changesMade;
+}
+void lscpedit::on_clearAll_pushButton_clicked()
+{
+    ui->tableView->clearSelection();
 }
 

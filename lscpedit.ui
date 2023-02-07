@@ -97,24 +97,31 @@
            </item>
            <item>
             <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
+             <item row="1" column="0">
               <widget class="QPushButton" name="newItem_pushButton">
                <property name="text">
-                <string>Add  MIDI</string>
+                <string>Add  </string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QPushButton" name="saveItem_pushButton">
                <property name="text">
                 <string>Save</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QPushButton" name="deleteItem_pushButton">
                <property name="text">
                 <string>Delete </string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="clearAll_pushButton">
+               <property name="text">
+                <string>New</string>
                </property>
               </widget>
              </item>
@@ -249,13 +256,6 @@
             <widget class="QCheckBox" name="autoCalc_checkBox">
              <property name="text">
               <string>Auto Calc</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QPushButton" name="clearAll_pushButton">
-             <property name="text">
-              <string>Clear All</string>
              </property>
             </widget>
            </item>

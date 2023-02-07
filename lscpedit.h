@@ -25,6 +25,7 @@ void dragEnterEvent(QDragEnterEvent *e);
 void dropEvent(QDropEvent *e);
 QStandardItemModel *model;
 QString *filename;
+QString *originalFileName;
 QString *gigFileName;
 QStringList splitLine(const QString &line);
 QStringList extractWordsBetweenApostrophes(const QString& line);
@@ -33,6 +34,8 @@ void printFiletoTable(QString *file, int mapIndex);
 void getGigFileName(QString *insfile);
 int addDataFromInputsToTableview();
 bool checkValueIfExist();
+void createTempFile(QString *originalFile, QString *tempFile);
+bool saveChangesToFile(QString *originalFile, QString *tempFile);
 QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
 int saveMapToFile(QString *file);
@@ -59,6 +62,8 @@ void on_newMap_pushButton_clicked();
 void on_editMap_pushButton_clicked();
 
 void on_deletMap_pushButton_clicked();
+
+void on_clearAll_pushButton_clicked();
 
 private:
     Ui::lscpedit *ui;
