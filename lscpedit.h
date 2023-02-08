@@ -8,6 +8,7 @@
 #include <QString>
 #include <QStringList>
 #include <QItemSelectionModel>
+#include <QLabel>
 #include "mapdialog.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
@@ -38,7 +39,6 @@ void createTempFile(QString *originalFile, QString *tempFile);
 bool saveChangesToFile(QString *originalFile, QString *tempFile);
 QItemSelectionModel *selectionModel;
 QStringList createLinesFromTable();
-int saveMapToFile(QString *file);
 void deleteSelectedRows();
 void renameMap(QString *file,const QString& oldName ,const QString& newName);
 int removeMap(QString *file,const QString& mapName);
@@ -52,6 +52,7 @@ void removeFile(QString *file);
 void saveAsFile(QString *file);
 void createNewFile();
 private slots:
+int saveMapToFile(QString *file);
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
 void calcBank();
@@ -61,7 +62,7 @@ void on_actionSave_triggered();
 
 void on_newItem_pushButton_clicked();
 
-void on_saveItem_pushButton_clicked();
+
 
 void on_deleteItem_pushButton_clicked();
 
@@ -80,9 +81,25 @@ void on_actionQuit_triggered();
 
 void on_actionNew_triggered();
 
+void on_bank_spinBox_valueChanged(int arg1);
+
+void on_instFilePath_lineEdit_textChanged(const QString &arg1);
+
+
+void on_nameGig_lineEdit_textChanged(const QString &arg1);
+
+void on_volume_doubleSpinBox_valueChanged(double arg1);
+
+void on_prog_spinBox_valueChanged(int arg1);
+
+void on_engine_comboBox_currentIndexChanged(int index);
+
+void on_loadMode_comboBox_currentIndexChanged(int index);
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 private:
     Ui::lscpedit *ui;
+    QLabel *label2;
 };
 #endif // LSCPEDIT_H

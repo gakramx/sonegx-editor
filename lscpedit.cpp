@@ -31,6 +31,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->tableView->setSortingEnabled(true);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
     ui->volume_doubleSpinBox->setDecimals(1);
@@ -101,6 +102,30 @@ lscpedit::lscpedit(QWidget *parent)
     connect(ui->msb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->lsb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->map_comboBox, SIGNAL(currentIndexChanged(int)),this, SLOT(printMap(int)));
+
+    // Add separator
+    /*QFrame *separator = new QFrame();
+    separator->setFrameShape(QFrame::HLine);
+    separator->setFrameShadow(QFrame::Sunken);
+    separator->setFixedWidth(2);
+    ui->statusbar->addWidget(separator);
+*/
+
+  //  label2->setFixedWidth(500);
+
+
+
+
+    QLabel *label1 = new QLabel("    | v0.01 | ");
+    ui->statusbar->addWidget(label1,0);
+
+   label2 = new QLabel(" File : ");
+    ui->statusbar->addWidget(label2, 1);
+/*
+    QLabel *label3 = new QLabel(" | Label 3 |    ");
+    ui->statusbar->addPermanentWidget(label3, 0);
+*/
+
 }
 void lscpedit::calcBank(){
     if(ui->autoCalc_checkBox->isChecked()){
@@ -274,6 +299,7 @@ void lscpedit::on_actionOpen_triggered()
     qDebug()<<"File temp :"<<*filename;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
+    label2->setText("File : " + *originalFileName);
 }
 void lscpedit::getGigFileName(QString *insfile){
     QString filePath = *insfile;
@@ -422,6 +448,7 @@ QStringList lscpedit::createLinesFromTable(){
         engine=engine_item->text();
         file=file_item->text();
         volume=volume_item->text();
+        qDebug()<<"VVVVVVVVVV:"<<volume;
         loadMode=loadMode_item->text();
         name=name_item->text();
         line="MAP MIDI_INSTRUMENT NON_MODAL "+QString::number(currentMap)+" " +bank + " " +prog + " " +engine +" \'"+file+"\' "+"0 "+volume+ " " +loadMode+" \'"+name+"\'";
@@ -429,10 +456,6 @@ QStringList lscpedit::createLinesFromTable(){
         qDebug()<<line;
     }
     return lines;
-}
-void lscpedit::on_saveItem_pushButton_clicked()
-{
-    saveMapToFile(filename);
 }
 int lscpedit::saveMapToFile(QString *file){
     QString map= ui->map_comboBox->currentText();
@@ -875,6 +898,7 @@ void lscpedit::on_actionSave_As_triggered()
     *filename=directoryPath+"/.~"+name;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
+    label2->setText("File : " + *originalFileName);
 }
 
 
@@ -905,5 +929,164 @@ void lscpedit::on_actionNew_triggered()
     *filename=directoryPath+"/.~"+name;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
+     label2->setText("File : " + *originalFileName);
+}
+
+
+void lscpedit::on_bank_spinBox_valueChanged(int arg1)
+{
+    QModelIndex index = ui->tableView->currentIndex();
+    int row = index.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 0;
+    model->setData(model->index(row, column), arg1);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+void lscpedit::on_instFilePath_lineEdit_textChanged(const QString &arg1)
+{
+    QModelIndex index = ui->tableView->currentIndex();
+    int row = index.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 3;
+    model->setData(model->index(row, column), arg1);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+
+
+void lscpedit::on_nameGig_lineEdit_textChanged(const QString &arg1)
+{
+    QModelIndex index = ui->tableView->currentIndex();
+    int row = index.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 6;
+    model->setData(model->index(row, column), arg1);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+void lscpedit::on_volume_doubleSpinBox_valueChanged(double arg1)
+{
+    QModelIndex index = ui->tableView->currentIndex();
+    int row = index.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 4;
+    QString str = QString::number(arg1, 'g', 1);
+    model->setData(model->index(row, column), str);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+void lscpedit::on_prog_spinBox_valueChanged(int arg1)
+{
+    QModelIndex index = ui->tableView->currentIndex();
+    int row = index.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 1;
+    model->setData(model->index(row, column), arg1);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+void lscpedit::on_engine_comboBox_currentIndexChanged(int index)
+{
+
+    QString engine_Word;
+    switch(index)
+    {
+    case 0:
+        engine_Word="GIG";
+        break;
+    case 1:
+        engine_Word="SF2";
+        break;
+    case 2:
+        engine_Word="SFZ";
+        break;
+    default:
+        break;
+    }
+    QModelIndex index1 = ui->tableView->currentIndex();
+    int row = index1.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 2;
+    model->setData(model->index(row, column), engine_Word);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
+}
+
+
+void lscpedit::on_loadMode_comboBox_currentIndexChanged(int index)
+{
+
+    QString mode_Word;
+    switch(index)
+    {
+    case 0:
+        mode_Word="ON_DEMAND";
+        break;
+    case 1:
+        mode_Word="ON_DEMAND";
+        break;
+    case 2:
+        mode_Word="ON_DEMAND_HOLD";
+        break;
+    case 3:
+        mode_Word="PERSISTENT";
+        break;
+    default:
+        break;
+    }
+
+    QModelIndex index1 = ui->tableView->currentIndex();
+    int row = index1.row();
+
+    QAbstractItemModel *model = ui->tableView->model();
+    int column = 5;
+    model->setData(model->index(row, column), mode_Word);
+
+    // Emit the dataChanged signal to refresh the view
+    QModelIndex startIndex = model->index(row, column);
+    QModelIndex endIndex = model->index(row, column);
+    emit model->dataChanged(startIndex, endIndex);
+    saveMapToFile(filename);
 }
 
