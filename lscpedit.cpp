@@ -205,7 +205,6 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
     }
 
 }
-
 void lscpedit::printMap(int mapIndex){
 
     model->removeRows(0, model->rowCount());
@@ -790,7 +789,7 @@ int lscpedit::addNewMaptoFile(QString *file,const QString& mapName){
 bool lscpedit::isFileSaved(QString *originalFileName, QString *tempFileName){
     QFile originalFile(*originalFileName);
     if (!originalFile.open(QFile::ReadOnly | QFile::Text)) {
-        return false;
+        return true;
     }
 
     // Read the contents of the original file
@@ -801,7 +800,7 @@ bool lscpedit::isFileSaved(QString *originalFileName, QString *tempFileName){
     // Read the contents of the temporary file
     QFile tempFile(*tempFileName);
     if (!tempFile.open(QFile::ReadOnly | QFile::Text)) {
-        return false;
+        return true;
     }
     QTextStream tempIn(&tempFile);
     QString tempContents = tempIn.readAll();
@@ -826,6 +825,8 @@ void lscpedit::closeEvent(QCloseEvent *event)
         event->ignore();
     }
     }
+    else
+        removeFile(filename);
 }
 void lscpedit::saveFile(){
     saveChangesToFile(originalFileName,filename);
@@ -834,5 +835,53 @@ void lscpedit::removeFile(QString *file){
     if (QFile::exists(*file)) {
         QFile::remove(*file);
     }
-
 }
+void lscpedit::saveAsFile(QString *file){
+    QString outputFileName = QFileDialog::getSaveFileName(0, "Save As", QDir::homePath(), "LSCP files (*.lscp)");
+    if (outputFileName.isEmpty())
+        return;
+
+    QFile inputFile(*file);
+    if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::critical(0, "Error", "Could not open input file");
+        return;
+    }
+
+    QFile outputFile(outputFileName);
+    if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QMessageBox::critical(0, "Error", "Could not open output file for writing");
+        return;
+    }
+
+    QTextStream in(&inputFile);
+    QTextStream out(&outputFile);
+    out << in.readAll();
+
+    inputFile.close();
+    outputFile.close();
+    *originalFileName=outputFileName;
+}
+
+void lscpedit::on_actionSave_As_triggered()
+{
+    saveAsFile(filename);
+    removeFile(filename);
+    QFileInfo fileInfo(*originalFileName);
+    QString directoryPath = fileInfo.absolutePath();
+    QString name = fileInfo.fileName();
+    *filename=directoryPath+"/.~"+name;
+    qDebug()<<"File name :"<<*originalFileName;
+    qDebug()<<"File temp :"<<*filename;
+    createTempFile(originalFileName,filename);
+    printFiletoTable(filename,0);
+}
+
+
+
+void lscpedit::on_actionQuit_triggered()
+{
+    lscpedit::close();
+}
+

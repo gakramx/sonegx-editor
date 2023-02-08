@@ -49,6 +49,7 @@ int addNewMaptoFile(QString *file,const QString& mapName);
 bool isFileSaved(QString *originalFileName, QString *tempFileName);
 void saveFile();
 void removeFile(QString *file);
+void saveAsFile(QString *file);
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
@@ -70,6 +71,12 @@ void on_editMap_pushButton_clicked();
 void on_deletMap_pushButton_clicked();
 
 void on_clearAll_pushButton_clicked();
+void on_actionSave_As_triggered();
+
+
+
+void on_actionQuit_triggered();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 private:
