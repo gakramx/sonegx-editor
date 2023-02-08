@@ -50,6 +50,7 @@ bool isFileSaved(QString *originalFileName, QString *tempFileName);
 void saveFile();
 void removeFile(QString *file);
 void saveAsFile(QString *file);
+void createNewFile();
 private slots:
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
@@ -76,6 +77,8 @@ void on_actionSave_As_triggered();
 
 
 void on_actionQuit_triggered();
+
+void on_actionNew_triggered();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

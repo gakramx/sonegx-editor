@@ -30,6 +30,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->tableView->setModel(model);
     ui->tableView->setSortingEnabled(true);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
     ui->volume_doubleSpinBox->setDecimals(1);
@@ -872,8 +873,6 @@ void lscpedit::on_actionSave_As_triggered()
     QString directoryPath = fileInfo.absolutePath();
     QString name = fileInfo.fileName();
     *filename=directoryPath+"/.~"+name;
-    qDebug()<<"File name :"<<*originalFileName;
-    qDebug()<<"File temp :"<<*filename;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
 }
@@ -883,5 +882,28 @@ void lscpedit::on_actionSave_As_triggered()
 void lscpedit::on_actionQuit_triggered()
 {
     lscpedit::close();
+}
+
+void lscpedit::createNewFile(){
+    QString newfileName = QFileDialog::getSaveFileName(nullptr, "Create New File",  QDir::homePath(), "LSCP files (*.lscp)");
+    if (!newfileName.isEmpty()) {
+        QFile file(newfileName);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.close();
+        }
+    }
+     *originalFileName=newfileName;
+
+}
+
+void lscpedit::on_actionNew_triggered()
+{
+    createNewFile();
+    QFileInfo fileInfo(*originalFileName);
+    QString directoryPath = fileInfo.absolutePath();
+    QString name = fileInfo.fileName();
+    *filename=directoryPath+"/.~"+name;
+    createTempFile(originalFileName,filename);
+    printFiletoTable(filename,0);
 }
 
