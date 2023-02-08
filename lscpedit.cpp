@@ -4,7 +4,6 @@
 #include <QTextStream>
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
-
 #include <iostream>
 #include <string>
 
@@ -17,7 +16,7 @@ lscpedit::lscpedit(QWidget *parent)
     setAcceptDrops(true);
     lscpedit::setWindowTitle("SONEGX LSCP Editor");
     lscpedit::setWindowIcon(QIcon(":/icons/icon.png"));
-    model = new QStandardItemModel(this);
+    model = new QStandardItemModel();
     filename = new QString();
     originalFileName = new QString();
     gigFileName = new QString();
@@ -32,7 +31,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->tableView->setSortingEnabled(true);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    //ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->volume_doubleSpinBox->setRange(0.0, 1.0);
     ui->volume_doubleSpinBox->setSingleStep(0.1);
     ui->volume_doubleSpinBox->setDecimals(1);
@@ -50,55 +49,63 @@ lscpedit::lscpedit(QWidget *parent)
     loadMode_items << "Default" << "On Demand" << "On Demand and Hold" << "Persistent";
     ui->loadMode_comboBox->addItems(loadMode_items);
 
-
     //QItemSelectionModel *
+
     selectionModel = ui->tableView->selectionModel();
 
     connect(selectionModel, &QItemSelectionModel::selectionChanged, [=](const QItemSelection &selected, const QItemSelection &deselected){
         QModelIndexList indexes = selected.indexes();
-        for (int i = 0; i < indexes.count(); i++) {
-            int row = indexes.at(i).row();
-            QString bank_data = model->item(row, 0)->text();
-            QString prog_data = model->item(row, 1)->text();
-            QString engine_data = model->item(row, 2)->text();
-            QString instFilePath_data = model->item(row, 3)->text();
-            QString volume_data = model->item(row, 4)->text();
-            QString loadmode_data = model->item(row, 5)->text();
-            QString name_data = model->item(row, 6)->text();
+        if (indexes.count() > 0) {
+            for (int i = 0; i < indexes.count(); i++) {
 
-            ui->bank_spinBox->setValue(bank_data.toInt());
-            int value=bank_data.toInt();
-            int MSB = value / 128;
-            int LSB = value - MSB * 128;
+                int row = indexes.at(i).row();
 
-            ui->msb_spinBox->setValue(MSB);
-            ui->lsb_spinBox->setValue(LSB);
+                QString bank_data = model->item(row, 0)->text();
+                QString prog_data = model->item(row, 1)->text();
+                QString engine_data = model->item(row, 2)->text();
+                QString instFilePath_data = model->item(row, 3)->text();
+                QString volume_data = model->item(row, 4)->text();
+                QString loadmode_data = model->item(row, 5)->text();
+                QString name_data = model->item(row, 6)->text();
+                bool ok;
+                int bank_int = bank_data.toInt(&ok);
+                if (ok)
+                    qDebug()<<bank_int;
 
-            ui->prog_spinBox->setValue(prog_data.toInt());
-            ui->volume_doubleSpinBox->setValue(volume_data.toFloat());
+                ui->bank_spinBox->setValue(bank_int);
 
-            if(engine_data=="GIG")
-                ui->engine_comboBox->setCurrentIndex(0);
-            else if(engine_data=="SF2")
-                ui->engine_comboBox->setCurrentIndex(1);
-            else if(engine_data=="SFZ")
-                ui->engine_comboBox->setCurrentIndex(2);
+                int value=bank_data.toInt();
+                int MSB = value / 128;
+                int LSB = value - MSB * 128;
 
-            ui->instFilePath_lineEdit->setText(instFilePath_data);
+                ui->msb_spinBox->setValue(MSB);
+                ui->lsb_spinBox->setValue(LSB);
 
-            if(loadmode_data=="ON_DEMAND")
-                ui->loadMode_comboBox->setCurrentIndex(1);
-            else if(loadmode_data=="ON_DEMAND_HOLD")
-                ui->loadMode_comboBox->setCurrentIndex(2);
-            else if(loadmode_data=="PERSISTENT")
-                ui->loadMode_comboBox->setCurrentIndex(3);
+                ui->prog_spinBox->setValue(prog_data.toInt());
+                ui->volume_doubleSpinBox->setValue(volume_data.toFloat());
 
-            ui->nameGig_lineEdit->setText(name_data);
+                if(engine_data=="GIG")
+                    ui->engine_comboBox->setCurrentIndex(0);
+                else if(engine_data=="SF2")
+                    ui->engine_comboBox->setCurrentIndex(1);
+                else if(engine_data=="SFZ")
+                    ui->engine_comboBox->setCurrentIndex(2);
+
+                ui->instFilePath_lineEdit->setText(instFilePath_data);
+
+                if(loadmode_data=="ON_DEMAND")
+                    ui->loadMode_comboBox->setCurrentIndex(1);
+                else if(loadmode_data=="ON_DEMAND_HOLD")
+                    ui->loadMode_comboBox->setCurrentIndex(2);
+                else if(loadmode_data=="PERSISTENT")
+                    ui->loadMode_comboBox->setCurrentIndex(3);
+
+                ui->nameGig_lineEdit->setText(name_data);
 
 
 
+            }
         }
-
     });
     connect(ui->msb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->lsb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
@@ -112,7 +119,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->statusbar->addWidget(separator);
 */
 
-  //  label2->setFixedWidth(500);
+    //  label2->setFixedWidth(500);
 
 
 
@@ -120,13 +127,28 @@ lscpedit::lscpedit(QWidget *parent)
     QLabel *label1 = new QLabel("    | v0.1 | ");
     ui->statusbar->addWidget(label1,0);
 
-   label2 = new QLabel(" File : ");
+    label2 = new QLabel(" File : ");
     ui->statusbar->addWidget(label2, 1);
-/*
+    /*
     QLabel *label3 = new QLabel(" | Label 3 |    ");
     ui->statusbar->addPermanentWidget(label3, 0);
 */
 
+
+    QStringList arguments = qApp->arguments();
+    if (arguments.count() > 1)
+    {
+        *originalFileName=arguments[1];
+        QFileInfo fileInfo(*originalFileName);
+        QString directoryPath = fileInfo.absolutePath();
+        QString name = fileInfo.fileName();
+        *filename=directoryPath+"/.~"+name;
+        qDebug()<<"File name :"<<*originalFileName;
+        qDebug()<<"File temp :"<<*filename;
+        createTempFile(originalFileName,filename);
+        printFiletoTable(filename,0);
+        label2->setText("File : " + *originalFileName);
+    }
 }
 void lscpedit::calcBank(){
     if(ui->autoCalc_checkBox->isChecked()){
@@ -147,20 +169,29 @@ void lscpedit::dragEnterEvent(QDragEnterEvent *e)
 void lscpedit::dropEvent(QDropEvent *e)
 {
     foreach (const QUrl &url, e->mimeData()->urls()) {
-       *gigFileName = url.toLocalFile();
-        if(gigFileName!=nullptr)
+
+        QString gig_o= url.toLocalFile();
+        if(!gig_o.isEmpty())
         {
+            *gigFileName=gig_o;
             ui->instFilePath_lineEdit->setText(*gigFileName);
             QFileInfo fileInfo(*gigFileName);
             QString name = fileInfo.baseName();
             ui->nameGig_lineEdit->setText(name);
         }
+
         //adding path to some item
     }
 }
 
 lscpedit::~lscpedit()
 {
+    for (int i = 0; i < model->rowCount(); i++) {
+        for (int j = 0; j < model->columnCount(); j++) {
+            delete model->item(i, j);
+        }
+    }
+    delete model;
     delete ui;
 }
 QStringList lscpedit::splitLine(const QString &line)
@@ -297,22 +328,27 @@ void lscpedit::printMap(int mapIndex){
 void lscpedit::on_actionOpen_triggered()
 {
 
-    *originalFileName = QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("lscp File(*.lscp)"));
-    QFileInfo fileInfo(*originalFileName);
-    QString directoryPath = fileInfo.absolutePath();
-    QString name = fileInfo.fileName();
-    *filename=directoryPath+"/.~"+name;
-    qDebug()<<"File name :"<<*originalFileName;
-    qDebug()<<"File temp :"<<*filename;
-    createTempFile(originalFileName,filename);
-    printFiletoTable(filename,0);
-    label2->setText("File : " + *originalFileName);
+    QString file_o = QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("lscp File(*.lscp)"));
+
+    if(!file_o.isEmpty()){
+        *originalFileName=file_o;
+        QFileInfo fileInfo(*originalFileName);
+        QString directoryPath = fileInfo.absolutePath();
+        QString name = fileInfo.fileName();
+        *filename=directoryPath+"/.~"+name;
+        qDebug()<<"File name :"<<*originalFileName;
+        qDebug()<<"File temp :"<<*filename;
+        createTempFile(originalFileName,filename);
+        printFiletoTable(filename,0);
+        label2->setText("File : " + *originalFileName);
+    }
 }
 void lscpedit::on_selectInstFile_pushButton_clicked()
 {
-    *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
-    if(gigFileName!=nullptr)
+    QString gig_o= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+    if(!gig_o.isEmpty())
     {
+        *gigFileName=gig_o;
         ui->instFilePath_lineEdit->setText(*gigFileName);
         QFileInfo fileInfo(*gigFileName);
         QString name = fileInfo.baseName();
@@ -321,6 +357,7 @@ void lscpedit::on_selectInstFile_pushButton_clicked()
 
 }
 int lscpedit::addDataFromInputsToTableview(){
+
     int current_engine  = ui->engine_comboBox->currentIndex();
     if(checkValueIfExist())
         return 1;
@@ -370,7 +407,6 @@ int lscpedit::addDataFromInputsToTableview(){
     items << new QStandardItem(mode_Word);
     items << new QStandardItem(ui->nameGig_lineEdit->text());
     model->appendRow(items);
-
     return 0;
 }
 void lscpedit::on_actionSave_triggered(){
@@ -494,6 +530,7 @@ int lscpedit::saveMapToFile(QString *file){
     inputFile.resize(0);
     stream << lines.join("\n");
     inputFile.close();
+    return 0;
 }
 void lscpedit::deleteSelectedRows(){
 
@@ -554,7 +591,7 @@ void lscpedit::on_editMap_pushButton_clicked()
     while(!renamed){
         MapDialog mapdialog;
         mapdialog.setMapName(mapName);
-         int result = mapdialog.exec();
+        int result = mapdialog.exec();
         if (result == QDialog::Accepted) {
             QString text = mapdialog.getMapName();
             renamed=checkIfMapExist(text);
@@ -633,7 +670,7 @@ int lscpedit::removeMap(QString *file, const QString &mapName){
     if (inputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&inputFile);
         for (const QString &line : lines) {
-            out << line << endl;
+            out << line << Qt::endl;
         }
         inputFile.close();
     }
@@ -684,7 +721,7 @@ int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
     inputFile.resize(0);
     QTextStream out(&inputFile);
     for (const QString &line : lines) {
-        out << line << endl;
+        out << line << Qt::endl;
     }
 
     inputFile.close();
@@ -692,7 +729,7 @@ int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
 }
 void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     // Open the original file
-     qDebug()<<"NEEEW tmp"<<*tempFile;
+    qDebug()<<"NEEEW tmp"<<*tempFile;
     QFile file(*originalFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug()<<"error1";
@@ -707,14 +744,14 @@ void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     QFile temp(*tempFile);
     if (!temp.open(QIODevice::WriteOnly | QIODevice::Text)) {
         // Handle error opening temp file
-         qDebug()<<"error2";
+        qDebug()<<"error2";
         return;
     }
     // Write the contents of the original file to the temp file
     QTextStream out(&temp);
     out << contents;
     temp.close();
-     qDebug()<<"final";
+    qDebug()<<"final";
 }
 bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
     // Open the original file
@@ -762,13 +799,15 @@ bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
 void lscpedit::on_clearAll_pushButton_clicked()
 {
     ui->tableView->clearSelection();
-    *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
-    if(gigFileName!=nullptr)
+    QString gig_o= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+
+    if(!gig_o.isEmpty())
     {
-    ui->instFilePath_lineEdit->setText(*gigFileName);
-    QFileInfo fileInfo(*gigFileName);
-    QString name = fileInfo.baseName();
-    ui->nameGig_lineEdit->setText(name);
+        *gigFileName=gig_o;
+        ui->instFilePath_lineEdit->setText(*gigFileName);
+        QFileInfo fileInfo(*gigFileName);
+        QString name = fileInfo.baseName();
+        ui->nameGig_lineEdit->setText(name);
     }
 
 }
@@ -845,17 +884,17 @@ void lscpedit::closeEvent(QCloseEvent *event)
 {
     bool isSaved=isFileSaved(originalFileName,filename);
     if(!isSaved){
-    int result = QMessageBox::warning(this, "Save Confirmation", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    if (result == QMessageBox::Yes) {
-        // run the save function here
-        saveFile();
-        event->accept();
-    } else if (result == QMessageBox::No) {
-        event->accept();
-        removeFile(filename);
-    } else {
-        event->ignore();
-    }
+        int result = QMessageBox::warning(this, "Save Confirmation", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        if (result == QMessageBox::Yes) {
+            // run the save function here
+            saveFile();
+            event->accept();
+        } else if (result == QMessageBox::No) {
+            event->accept();
+            removeFile(filename);
+        } else {
+            event->ignore();
+        }
     }
     else
         removeFile(filename);
@@ -924,7 +963,7 @@ void lscpedit::createNewFile(){
             file.close();
         }
     }
-     *originalFileName=newfileName;
+    *originalFileName=newfileName;
 
 }
 
@@ -938,24 +977,26 @@ void lscpedit::on_actionNew_triggered()
     qDebug()<<"NEEEW tmp"<<*filename;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
-     label2->setText("File : " + *originalFileName);
+    label2->setText("File : " + *originalFileName);
 }
 
 
 void lscpedit::on_bank_spinBox_valueChanged(int arg1)
 {
     QModelIndex index = ui->tableView->currentIndex();
-    int row = index.row();
+    if (index.isValid()){
+        int row = index.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 0;
-    model->setData(model->index(row, column), arg1);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 0;
+        model->setData(model->index(row, column), arg1);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
@@ -963,16 +1004,17 @@ void lscpedit::on_instFilePath_lineEdit_textChanged(const QString &arg1)
 {
     QModelIndex index = ui->tableView->currentIndex();
     int row = index.row();
+    if (index.isValid()){
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 3;
+        model->setData(model->index(row, column), arg1);
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 3;
-    model->setData(model->index(row, column), arg1);
-
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
@@ -981,52 +1023,58 @@ void lscpedit::on_instFilePath_lineEdit_textChanged(const QString &arg1)
 void lscpedit::on_nameGig_lineEdit_textChanged(const QString &arg1)
 {
     QModelIndex index = ui->tableView->currentIndex();
-    int row = index.row();
+    if (index.isValid()){
+        int row = index.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 6;
-    model->setData(model->index(row, column), arg1);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 6;
+        model->setData(model->index(row, column), arg1);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
 void lscpedit::on_volume_doubleSpinBox_valueChanged(double arg1)
 {
     QModelIndex index = ui->tableView->currentIndex();
-    int row = index.row();
+    if (index.isValid()){
+        int row = index.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 4;
-    QString str = QString::number(arg1, 'g', 1);
-    model->setData(model->index(row, column), str);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 4;
+        QString str = QString::number(arg1, 'g', 1);
+        model->setData(model->index(row, column), str);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
 void lscpedit::on_prog_spinBox_valueChanged(int arg1)
 {
     QModelIndex index = ui->tableView->currentIndex();
-    int row = index.row();
+    if (index.isValid()){
+        int row = index.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 1;
-    model->setData(model->index(row, column), arg1);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 1;
+        model->setData(model->index(row, column), arg1);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
@@ -1049,17 +1097,19 @@ void lscpedit::on_engine_comboBox_currentIndexChanged(int index)
         break;
     }
     QModelIndex index1 = ui->tableView->currentIndex();
-    int row = index1.row();
+    if (index1.isValid()){
+        int row = index1.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 2;
-    model->setData(model->index(row, column), engine_Word);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 2;
+        model->setData(model->index(row, column), engine_Word);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
 
 
@@ -1086,19 +1136,20 @@ void lscpedit::on_loadMode_comboBox_currentIndexChanged(int index)
     }
 
     QModelIndex index1 = ui->tableView->currentIndex();
-    int row = index1.row();
+    if (index1.isValid()){
+        int row = index1.row();
 
-    QAbstractItemModel *model = ui->tableView->model();
-    int column = 5;
-    model->setData(model->index(row, column), mode_Word);
+        QAbstractItemModel *model = ui->tableView->model();
+        int column = 5;
+        model->setData(model->index(row, column), mode_Word);
 
-    // Emit the dataChanged signal to refresh the view
-    QModelIndex startIndex = model->index(row, column);
-    QModelIndex endIndex = model->index(row, column);
-    emit model->dataChanged(startIndex, endIndex);
-    saveMapToFile(filename);
+        // Emit the dataChanged signal to refresh the view
+        QModelIndex startIndex = model->index(row, column);
+        QModelIndex endIndex = model->index(row, column);
+        emit model->dataChanged(startIndex, endIndex);
+        saveMapToFile(filename);
+    }
 }
-
 
 void lscpedit::on_resetName_pushButton_clicked()
 {
@@ -1117,4 +1168,3 @@ void lscpedit::on_actionAbout_triggered()
     about abt;
     abt.exec();
 }
-
