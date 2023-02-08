@@ -32,7 +32,6 @@ QStringList splitLine(const QString &line);
 QStringList extractWordsBetweenApostrophes(const QString& line);
 QString removeWordsBetweenApostrophes(const QString& line);
 void printFiletoTable(QString *file, int mapIndex);
-void getGigFileName(QString *insfile);
 int addDataFromInputsToTableview();
 bool checkValueIfExist();
 void createTempFile(QString *originalFile, QString *tempFile);
@@ -95,6 +94,8 @@ void on_prog_spinBox_valueChanged(int arg1);
 void on_engine_comboBox_currentIndexChanged(int index);
 
 void on_loadMode_comboBox_currentIndexChanged(int index);
+
+void on_resetName_pushButton_clicked();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

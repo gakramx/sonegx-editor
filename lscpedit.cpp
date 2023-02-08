@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <string>
-#include<libgig/gig.h>
 
 
 lscpedit::lscpedit(QWidget *parent)
@@ -301,25 +300,16 @@ void lscpedit::on_actionOpen_triggered()
     printFiletoTable(filename,0);
     label2->setText("File : " + *originalFileName);
 }
-void lscpedit::getGigFileName(QString *insfile){
-    QString filePath = *insfile;
-    std::string gigFilePath =   filePath.toStdString();
-    //  std::string gigFilePath = "/home/akram/Mun.gig";
-    RIFF::File* riff = new RIFF::File(gigFilePath);
-    gig::File* gig = new gig::File(riff);
-    gig::Instrument* instr = gig->GetInstrument(0);
-    QString fInstName = QString::fromStdString(instr->pInfo->Name);
-    // qDebug()<<fInstName;
-    ui->nameGig_lineEdit->setText(fInstName);
-    delete riff;
-    delete gig;
-}
 void lscpedit::on_selectInstFile_pushButton_clicked()
 {
     *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
-    ui->instFilePath_lineEdit->setText(*gigFileName);
-    // ui->nameGig_lineEdit->setText("Loading ...");
-    // getGigFileName(gigFileName);
+    if(gigFileName!=nullptr)
+    {
+        ui->instFilePath_lineEdit->setText(*gigFileName);
+        QFileInfo fileInfo(*gigFileName);
+        QString name = fileInfo.baseName();
+        ui->nameGig_lineEdit->setText(name);
+    }
 
 }
 int lscpedit::addDataFromInputsToTableview(){
@@ -761,7 +751,13 @@ void lscpedit::on_clearAll_pushButton_clicked()
 {
     ui->tableView->clearSelection();
     *gigFileName= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
+    if(gigFileName!=nullptr)
+    {
     ui->instFilePath_lineEdit->setText(*gigFileName);
+    QFileInfo fileInfo(*gigFileName);
+    QString name = fileInfo.baseName();
+    ui->nameGig_lineEdit->setText(name);
+    }
 
 }
 bool lscpedit::addMapToComboBox(const QString &item){
@@ -1088,5 +1084,17 @@ void lscpedit::on_loadMode_comboBox_currentIndexChanged(int index)
     QModelIndex endIndex = model->index(row, column);
     emit model->dataChanged(startIndex, endIndex);
     saveMapToFile(filename);
+}
+
+
+void lscpedit::on_resetName_pushButton_clicked()
+{
+    if(gigFileName!=nullptr)
+    {
+        ui->instFilePath_lineEdit->setText(*gigFileName);
+        QFileInfo fileInfo(*gigFileName);
+        QString name = fileInfo.baseName();
+        ui->nameGig_lineEdit->setText(name);
+    }
 }
 
