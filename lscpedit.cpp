@@ -7,7 +7,6 @@
 #include <iostream>
 #include <string>
 
-
 lscpedit::lscpedit(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::lscpedit)

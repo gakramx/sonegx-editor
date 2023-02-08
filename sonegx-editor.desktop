@@ -2,7 +2,8 @@
 Type=Application
 Name=Sonegx editor
 Comment=Sonegx LSCP editor
-Exec=/usr/bin/sonegx-editor
+Exec=sonegx-editor %f
 Icon=/usr/share/icons/hicolor/128x128/apps/sonegx-editor.png
+MimeType=application/lscp;
 Terminal=false
 Categories=Utility;
