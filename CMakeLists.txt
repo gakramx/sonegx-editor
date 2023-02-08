@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(lscpedit VERSION 0.1 LANGUAGES CXX)
+project(sonegx-editor VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -28,7 +28,7 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(lscpedit
+    qt_add_executable(sonegx-editor
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
@@ -38,21 +38,21 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(lscpedit SHARED
+        add_library(sonegx-editor SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(lscpedit
+        add_executable(sonegx-editor
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_link_libraries(lscpedit PRIVATE Qt${QT_VERSION_MAJOR}::Widgets  Qt${QT_VERSION_MAJOR}::Concurrent )
+target_link_libraries(sonegx-editor PRIVATE Qt${QT_VERSION_MAJOR}::Widgets  Qt${QT_VERSION_MAJOR}::Concurrent )
 
-set_target_properties(lscpedit PROPERTIES
+set_target_properties(sonegx-editor PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -60,10 +60,10 @@ set_target_properties(lscpedit PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS lscpedit
+install(TARGETS sonegx-editor
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(lscpedit)
+    qt_finalize_executable(sonegx-editor)
 endif()
