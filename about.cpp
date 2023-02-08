@@ -7,7 +7,7 @@ about::about(QWidget *parent) :
 {
     ui->setupUi(this);
     about::setWindowTitle("About");
-    ui->label_3->setPixmap(QPixmap(":/icons/LSCP Editor-128px.png"));
+    ui->label_3->setPixmap(QPixmap(":/icons/icon.png"));
 }
 
 about::~about()

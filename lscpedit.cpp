@@ -16,7 +16,7 @@ lscpedit::lscpedit(QWidget *parent)
     ui->setupUi(this);
     setAcceptDrops(true);
     lscpedit::setWindowTitle("SONEGX LSCP Editor");
-    lscpedit::setWindowIcon(QIcon(":/icons/LSCP Editor-256px.png"));
+    lscpedit::setWindowIcon(QIcon(":/icons/icon.png"));
     model = new QStandardItemModel(this);
     filename = new QString();
     originalFileName = new QString();

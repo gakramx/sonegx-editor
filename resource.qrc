@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/LSCP Editor-256px.png</file>
-        <file>icons/LSCP Editor-128px.png</file>
+        <file>icons/icon.png</file>
     </qresource>
 </RCC>
