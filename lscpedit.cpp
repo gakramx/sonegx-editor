@@ -15,6 +15,8 @@ lscpedit::lscpedit(QWidget *parent)
 {
     ui->setupUi(this);
     setAcceptDrops(true);
+    lscpedit::setWindowTitle("SONEGX LSCP Editor");
+    lscpedit::setWindowIcon(QIcon(":/icons/LSCP Editor-256px.png"));
     model = new QStandardItemModel(this);
     filename = new QString();
     originalFileName = new QString();
@@ -145,8 +147,14 @@ void lscpedit::dragEnterEvent(QDragEnterEvent *e)
 void lscpedit::dropEvent(QDropEvent *e)
 {
     foreach (const QUrl &url, e->mimeData()->urls()) {
-        QString fileName = url.toLocalFile();
-        ui->instFilePath_lineEdit->setText(fileName);
+       *gigFileName = url.toLocalFile();
+        if(gigFileName!=nullptr)
+        {
+            ui->instFilePath_lineEdit->setText(*gigFileName);
+            QFileInfo fileInfo(*gigFileName);
+            QString name = fileInfo.baseName();
+            ui->nameGig_lineEdit->setText(name);
+        }
         //adding path to some item
     }
 }
@@ -1096,5 +1104,12 @@ void lscpedit::on_resetName_pushButton_clicked()
         QString name = fileInfo.baseName();
         ui->nameGig_lineEdit->setText(name);
     }
+}
+
+
+void lscpedit::on_actionAbout_triggered()
+{
+    about abt;
+    abt.exec();
 }
 

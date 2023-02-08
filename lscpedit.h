@@ -10,6 +10,7 @@
 #include <QItemSelectionModel>
 #include <QLabel>
 #include "mapdialog.h"
+#include "about.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
 QT_END_NAMESPACE
@@ -96,6 +97,8 @@ void on_engine_comboBox_currentIndexChanged(int index);
 void on_loadMode_comboBox_currentIndexChanged(int index);
 
 void on_resetName_pushButton_clicked();
+
+void on_actionAbout_triggered();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

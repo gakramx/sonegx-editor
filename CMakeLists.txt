@@ -19,8 +19,12 @@ set(PROJECT_SOURCES
         lscpedit.h
         mapdialog.cpp
         mapdialog.h
+        about.cpp
+        about.h
+        about.ui
         mapdialog.ui
         lscpedit.ui
+        resource.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/LSCP Editor-256px.png</file>
+    </qresource>
+</RCC>
