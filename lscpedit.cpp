@@ -117,7 +117,7 @@ lscpedit::lscpedit(QWidget *parent)
 
 
 
-    QLabel *label1 = new QLabel("    | v0.01 | ");
+    QLabel *label1 = new QLabel("    | v0.1 | ");
     ui->statusbar->addWidget(label1,0);
 
    label2 = new QLabel(" File : ");
@@ -692,8 +692,10 @@ int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
 }
 void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     // Open the original file
+     qDebug()<<"NEEEW tmp"<<*tempFile;
     QFile file(*originalFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug()<<"error1";
         // Handle error opening file
         return;
     }
@@ -705,12 +707,14 @@ void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     QFile temp(*tempFile);
     if (!temp.open(QIODevice::WriteOnly | QIODevice::Text)) {
         // Handle error opening temp file
+         qDebug()<<"error2";
         return;
     }
     // Write the contents of the original file to the temp file
     QTextStream out(&temp);
     out << contents;
     temp.close();
+     qDebug()<<"final";
 }
 bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
     // Open the original file
@@ -931,6 +935,7 @@ void lscpedit::on_actionNew_triggered()
     QString directoryPath = fileInfo.absolutePath();
     QString name = fileInfo.fileName();
     *filename=directoryPath+"/.~"+name;
+    qDebug()<<"NEEEW tmp"<<*filename;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
      label2->setText("File : " + *originalFileName);
