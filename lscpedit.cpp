@@ -48,80 +48,13 @@ lscpedit::lscpedit(QWidget *parent)
     loadMode_items << "Default" << "On Demand" << "On Demand and Hold" << "Persistent";
     ui->loadMode_comboBox->addItems(loadMode_items);
 
-    //QItemSelectionModel *
-
-    selectionModel = ui->tableView->selectionModel();
-
-    connect(selectionModel, &QItemSelectionModel::selectionChanged, [=](const QItemSelection &selected, const QItemSelection &deselected){
-        QModelIndexList indexes = selected.indexes();
-        if (indexes.count() > 0) {
-            for (int i = 0; i < indexes.count(); i++) {
-
-                int row = indexes.at(i).row();
-
-                QString bank_data = model->item(row, 0)->text();
-                QString prog_data = model->item(row, 1)->text();
-                QString engine_data = model->item(row, 2)->text();
-                QString instFilePath_data = model->item(row, 3)->text();
-                QString volume_data = model->item(row, 4)->text();
-                QString loadmode_data = model->item(row, 5)->text();
-                QString name_data = model->item(row, 6)->text();
-                bool ok;
-                int bank_int = bank_data.toInt(&ok);
-                if (ok)
-                    qDebug()<<bank_int;
-
-                ui->bank_spinBox->setValue(bank_int);
-
-                int value=bank_data.toInt();
-                int MSB = value / 128;
-                int LSB = value - MSB * 128;
-
-                ui->msb_spinBox->setValue(MSB);
-                ui->lsb_spinBox->setValue(LSB);
-
-                ui->prog_spinBox->setValue(prog_data.toInt());
-                ui->volume_doubleSpinBox->setValue(volume_data.toFloat());
-
-                if(engine_data=="GIG")
-                    ui->engine_comboBox->setCurrentIndex(0);
-                else if(engine_data=="SF2")
-                    ui->engine_comboBox->setCurrentIndex(1);
-                else if(engine_data=="SFZ")
-                    ui->engine_comboBox->setCurrentIndex(2);
-
-                ui->instFilePath_lineEdit->setText(instFilePath_data);
-
-                if(loadmode_data=="ON_DEMAND")
-                    ui->loadMode_comboBox->setCurrentIndex(1);
-                else if(loadmode_data=="ON_DEMAND_HOLD")
-                    ui->loadMode_comboBox->setCurrentIndex(2);
-                else if(loadmode_data=="PERSISTENT")
-                    ui->loadMode_comboBox->setCurrentIndex(3);
-
-                ui->nameGig_lineEdit->setText(name_data);
+    QItemSelectionModel *selectionModel = ui->tableView->selectionModel();
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &lscpedit::onSelectionChanged);
 
 
-
-            }
-        }
-    });
     connect(ui->msb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->lsb_spinBox, SIGNAL(valueChanged(int)), this, SLOT(calcBank()));
     connect(ui->map_comboBox, SIGNAL(currentIndexChanged(int)),this, SLOT(printMap(int)));
-
-    // Add separator
-    /*QFrame *separator = new QFrame();
-    separator->setFrameShape(QFrame::HLine);
-    separator->setFrameShadow(QFrame::Sunken);
-    separator->setFixedWidth(2);
-    ui->statusbar->addWidget(separator);
-*/
-
-    //  label2->setFixedWidth(500);
-
-
-
 
     QLabel *label1 = new QLabel("    | v0.1 | ");
     ui->statusbar->addWidget(label1,0);
@@ -294,12 +227,12 @@ void lscpedit::printMap(int mapIndex){
                     QStringList words2 = extractWordsBetweenApostrophes(line);
                     QString modifiedLine = removeWordsBetweenApostrophes(line);
                     QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
-                    QString mapindexd_Word = words.at(3);
+                    //QString mapindexd_Word = words.at(3);
                     QString bank_Word = words.at(4);
                     QString prog_Word = words.at(5);
                     QString engine_Word = words.at(6);
                     QString filepath_Word = words2.at(0);
-                    QString idont_Word = words.at(7);
+                   // QString idont_Word = words.at(7);
                     QString volume_Word = words.at(9);
                     QString loadmode_Word = words.at(10);
                     QString name_Word = words2.at(1);
@@ -633,7 +566,7 @@ void lscpedit::renameMap(QString *file,const QString& oldName ,const QString& ne
         return;
 
     QTextStream out(&inputFile);
-    for (const QString &line : lines)
+    for (const QString &line : qAsConst(lines))
         out << line << "\n";
     inputFile.close();
 
@@ -1166,4 +1099,59 @@ void lscpedit::on_actionAbout_triggered()
 {
     about abt;
     abt.exec();
+}
+
+void lscpedit::onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected){
+    QModelIndexList indexes = selected.indexes();
+    if (indexes.count() > 0) {
+        for (int i = 0; i < indexes.count(); i++) {
+
+            int row = indexes.at(i).row();
+
+            QString bank_data = model->item(row, 0)->text();
+            QString prog_data = model->item(row, 1)->text();
+            QString engine_data = model->item(row, 2)->text();
+            QString instFilePath_data = model->item(row, 3)->text();
+            QString volume_data = model->item(row, 4)->text();
+            QString loadmode_data = model->item(row, 5)->text();
+            QString name_data = model->item(row, 6)->text();
+            bool ok;
+            int bank_int = bank_data.toInt(&ok);
+            if (ok)
+                qDebug()<<bank_int;
+
+            ui->bank_spinBox->setValue(bank_int);
+
+            int value=bank_data.toInt();
+            int MSB = value / 128;
+            int LSB = value - MSB * 128;
+
+            ui->msb_spinBox->setValue(MSB);
+            ui->lsb_spinBox->setValue(LSB);
+
+            ui->prog_spinBox->setValue(prog_data.toInt());
+            ui->volume_doubleSpinBox->setValue(volume_data.toFloat());
+
+            if(engine_data=="GIG")
+                ui->engine_comboBox->setCurrentIndex(0);
+            else if(engine_data=="SF2")
+                ui->engine_comboBox->setCurrentIndex(1);
+            else if(engine_data=="SFZ")
+                ui->engine_comboBox->setCurrentIndex(2);
+
+            ui->instFilePath_lineEdit->setText(instFilePath_data);
+
+            if(loadmode_data=="ON_DEMAND")
+                ui->loadMode_comboBox->setCurrentIndex(1);
+            else if(loadmode_data=="ON_DEMAND_HOLD")
+                ui->loadMode_comboBox->setCurrentIndex(2);
+            else if(loadmode_data=="PERSISTENT")
+                ui->loadMode_comboBox->setCurrentIndex(3);
+
+            ui->nameGig_lineEdit->setText(name_data);
+
+
+
+        }
+    }
 }

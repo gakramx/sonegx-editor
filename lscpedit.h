@@ -11,6 +11,8 @@
 #include <QLabel>
 #include "mapdialog.h"
 #include "about.h"
+#include<QItemSelection>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class lscpedit; }
 QT_END_NAMESPACE
@@ -56,6 +58,7 @@ int saveMapToFile(QString *file);
 void printMap(int mapIndex);
 void on_actionOpen_triggered();
 void calcBank();
+void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 void on_selectInstFile_pushButton_clicked();
 
 void on_actionSave_triggered();
