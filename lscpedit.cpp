@@ -328,6 +328,7 @@ int lscpedit::addDataFromInputsToTableview(){
     items << new QStandardItem(mode_Word);
     items << new QStandardItem(ui->nameGig_lineEdit->text());
     model->appendRow(items);
+    ui->prog_spinBox->stepUp();
     return 0;
 }
 void lscpedit::on_actionSave_triggered(){
