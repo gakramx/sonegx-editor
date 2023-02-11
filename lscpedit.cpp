@@ -75,8 +75,6 @@ lscpedit::lscpedit(QWidget *parent)
         QString directoryPath = fileInfo.absolutePath();
         QString name = fileInfo.fileName();
         *filename=directoryPath+"/.~"+name;
-        qDebug()<<"File name :"<<*originalFileName;
-        qDebug()<<"File temp :"<<*filename;
         createTempFile(originalFileName,filename);
         printFiletoTable(filename,0);
         label2->setText("File : " + *originalFileName);
@@ -187,14 +185,10 @@ void lscpedit::printFiletoTable(QString *file,int mapIndex){
             else if (line.isEmpty())
                 continue;
             else if (line.startsWith("ADD MIDI_INSTRUMENT_MAP")) {
-                qDebug()<< "Found1 ";
-                qDebug()<<line;
                 QStringList maps = extractWordsBetweenApostrophes(line);
-                qDebug()<<maps.last();
                 mapsFinal.append(maps.last());
             }
         }
-        qDebug()<<mapsFinal;
         ui->map_comboBox->addItems(mapsFinal);
         ui->map_comboBox->setCurrentIndex(0);
         inputFile.close();
@@ -216,14 +210,11 @@ void lscpedit::printMap(int mapIndex){
             else if (line.isEmpty())
                 continue;
             else if (line.startsWith("MAP MIDI_INSTRUMENT")) {
-                qDebug()<< "Found2";
                 QStringList getIndex = line.split(" ");
                 QString indexToInt = getIndex.at(3);
                 int finalInt= indexToInt.toInt();
-                qDebug()<< "Final int "<<finalInt;
                 if(finalInt==mapIndex)
                 {
-                    qDebug()<< "Found3 ";
                     QStringList words2 = extractWordsBetweenApostrophes(line);
                     QString modifiedLine = removeWordsBetweenApostrophes(line);
                     QStringList words = modifiedLine.split(" ");//QRegExp("\\b"), QString::SkipEmptyParts);
@@ -268,8 +259,6 @@ void lscpedit::on_actionOpen_triggered()
         QString directoryPath = fileInfo.absolutePath();
         QString name = fileInfo.fileName();
         *filename=directoryPath+"/.~"+name;
-        qDebug()<<"File name :"<<*originalFileName;
-        qDebug()<<"File temp :"<<*filename;
         createTempFile(originalFileName,filename);
         printFiletoTable(filename,0);
         label2->setText("File : " + *originalFileName);
@@ -375,8 +364,6 @@ bool lscpedit::checkValueIfExist(){
 
         if (item->text().toInt() == bank && item2->text().toInt() == prog) {
             value1Exists = true;
-                // qDebug() << "bank" << item->text().toInt()  << ".";
-                // qDebug() << "Prog" << item2->text().toInt() << ".";
         }
     }
     if (value1Exists) {
@@ -414,12 +401,10 @@ QStringList lscpedit::createLinesFromTable(){
         engine=engine_item->text();
         file=file_item->text();
         volume=volume_item->text();
-        qDebug()<<"VVVVVVVVVV:"<<volume;
         loadMode=loadMode_item->text();
         name=name_item->text();
         line="MAP MIDI_INSTRUMENT NON_MODAL "+QString::number(currentMap)+" " +bank + " " +prog + " " +engine +" \'"+file+"\' "+"0 "+volume+ " " +loadMode+" \'"+name+"\'";
         lines.append(line);
-        qDebug()<<line;
     }
     return lines;
 }
@@ -443,7 +428,6 @@ int lscpedit::saveMapToFile(QString *file){
             if (parts.count() >= 3) {
                 QString thirdWord = parts[2];
                 thirdWord.remove("'");
-                qDebug()<<thirdWord;
                 if (thirdWord == map) {
                     int j = i + 1;
                     while (j < lines.size() && !lines[j].startsWith("ADD MIDI_INSTRUMENT_MAP")) {
@@ -621,8 +605,6 @@ void lscpedit::on_deletMap_pushButton_clicked()
 
     int count=ui->map_comboBox->count();
     for (int i = mapIndex; i < count; i++) {
-        qDebug()<<i;
-
         orderMapIndex(filename,i+1,i);
     }
     ui->map_comboBox->removeItem(mapIndex);
@@ -661,10 +643,8 @@ int lscpedit::orderMapIndex(QString *file,int currentIndex , int newIndex){
 }
 void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     // Open the original file
-    qDebug()<<"NEEEW tmp"<<*tempFile;
     QFile file(*originalFile);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug()<<"error1";
         // Handle error opening file
         return;
     }
@@ -676,14 +656,12 @@ void lscpedit::createTempFile(QString *originalFile, QString *tempFile){
     QFile temp(*tempFile);
     if (!temp.open(QIODevice::WriteOnly | QIODevice::Text)) {
         // Handle error opening temp file
-        qDebug()<<"error2";
         return;
     }
     // Write the contents of the original file to the temp file
     QTextStream out(&temp);
     out << contents;
     temp.close();
-    qDebug()<<"final";
 }
 bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
     // Open the original file
@@ -731,6 +709,7 @@ bool lscpedit::saveChangesToFile(QString *originalFile, QString *tempFile){
 void lscpedit::on_clearAll_pushButton_clicked()
 {
     ui->tableView->clearSelection();
+     ui->tableView->setCurrentIndex(QModelIndex());
     QString gig_o= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
 
     if(!gig_o.isEmpty())
@@ -906,7 +885,6 @@ void lscpedit::on_actionNew_triggered()
     QString directoryPath = fileInfo.absolutePath();
     QString name = fileInfo.fileName();
     *filename=directoryPath+"/.~"+name;
-    qDebug()<<"NEEEW tmp"<<*filename;
     createTempFile(originalFileName,filename);
     printFiletoTable(filename,0);
     label2->setText("File : " + *originalFileName);
@@ -918,7 +896,6 @@ void lscpedit::on_bank_spinBox_valueChanged(int arg1)
     QModelIndex index = ui->tableView->currentIndex();
     if (index.isValid()){
         int row = index.row();
-
         QAbstractItemModel *model = ui->tableView->model();
         int column = 0;
         model->setData(model->index(row, column), arg1);
