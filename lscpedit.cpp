@@ -711,11 +711,11 @@ void lscpedit::on_clearAll_pushButton_clicked()
 {
     ui->tableView->clearSelection();
      ui->tableView->setCurrentIndex(QModelIndex());
-    QString gig_o= QFileDialog::getOpenFileName(this, ("Open File"), QDir::homePath(), ("GIG File(*.gig)"));
-
+    ui->instFilePath_lineEdit->clear();
+    ui->nameGig_lineEdit->clear();
+    QString gig_o=*gigFileName;
     if(!gig_o.isEmpty())
     {
-        *gigFileName=gig_o;
         ui->instFilePath_lineEdit->setText(*gigFileName);
         QFileInfo fileInfo(*gigFileName);
         QString name = fileInfo.baseName();
@@ -727,7 +727,6 @@ bool lscpedit::addMapToComboBox(const QString &item){
 
     int index = ui->map_comboBox->findText(item);
     if (index == -1) {
-
 
         return true;
     } else {
